@@ -73,7 +73,7 @@ function render(data){
     const positive=Number(m.rate)>=0;
     $("monthlyRate").textContent=(positive?"▲ ":"▼ ")+pct(Math.abs(m.rate),2);
     $("monthlyRate").className="kpi-value growth"+(positive?"":" negative");
-    $("monthlyAmount").textContent=(positive?"+ ":"- ")+money(Math.abs(m.changeAmount));
+    $("monthlyAmount").textContent=(positive?"+ ":"- ")+money(Math.abs(m.amount ?? m.changeAmount));
     $("monthlyAmount").className="growth"+(positive?"":" negative");
     $("monthlyRange").textContent=`(${dateText(m.previousDate)} → ${dateText(m.latestDate)})`;
   }else{
