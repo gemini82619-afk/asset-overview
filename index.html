@@ -43,6 +43,30 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
     .section-heading-row{align-items:flex-start}
     .range-select-wrap span{display:none}
   }
+
+  /* V2.5：初始資產三項資訊水平排列 */
+  .initial-stats-horizontal{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+  }
+  .initial-stats-horizontal .stat-box{
+    min-width:0;
+  }
+  @media (max-width:760px){
+    .initial-stats-horizontal{
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px;
+    }
+    .initial-stats-horizontal .stat-value{
+      font-size:clamp(17px,4vw,24px);
+    }
+  }
+  @media (max-width:520px){
+    .initial-stats-horizontal{
+      grid-template-columns:1fr;
+    }
+  }
 </style>
 </head>
 <body>
@@ -169,7 +193,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbyl6tzaf7O1lNhfuOVEH7zJPrdg5LhAUj42y_gdzczqST9xxCZJHSXrjyVilHnwo2LYNQ/exec";
-const EXPECTED_API_VERSION="V2.2-DAILY-STATS";
+const EXPECTED_API_VERSION="V2.5-INITIAL-HORIZONTAL-DAILY-GROWTH";
 
 const $=id=>document.getElementById(id);
 
@@ -536,17 +560,19 @@ function renderStats(data){
   const meta=data?.meta||{};
 
   $("initialStats").innerHTML=`
-    <div class="stat-box">
-      <div class="stat-label">初始日期</div>
-      <div class="stat-value">${dateText(meta.initialDate)}</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-label">初始資產</div>
-      <div class="stat-value">${money(meta.initialAsset)}</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-label">總成長率</div>
-      <div class="stat-value good">${pct(meta.totalGrowthRate,2)}</div>
+    <div class="initial-stats-horizontal">
+      <div class="stat-box">
+        <div class="stat-label">初始日期</div>
+        <div class="stat-value">${dateText(meta.initialDate)}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">初始資產</div>
+        <div class="stat-value">${money(meta.initialAsset)}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">總成長率</div>
+        <div class="stat-value good">${pct(meta.totalGrowthRate,2)}</div>
+      </div>
     </div>`;
 
   const annual=data?.annualStats||[];
