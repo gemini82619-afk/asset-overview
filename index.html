@@ -67,6 +67,11 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
       grid-template-columns:1fr;
     }
   }
+
+  /* V2.6：目標設定／股票資料 */
+  .compact-table{overflow-x:auto}
+  .compact-table table{min-width:560px}
+  .compact-table th,.compact-table td{padding:8px 10px}
 </style>
 </head>
 <body>
@@ -121,8 +126,8 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
         </svg>
         目標設定
       </div>
-      <div class="goal-settings-note">
-        本年度、2028 中期、2033 長期目標沿用 Google Sheets 既有資料。
+      <div class="table-scroll compact-table">
+        <table id="goalSettingsTable"></table>
       </div>
     </div>
   </div>
@@ -176,8 +181,11 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
       </svg>
       投資資產（股票）
     </div>
-    <div class="stock-management-row">
-      <div class="small">股票代號、持有股數與現值管理沿用原有股票管理功能。</div>
+    <div class="table-scroll compact-table">
+      <table id="stockTable"></table>
+    </div>
+    <div class="stock-management-row" style="margin-top:12px">
+      <div class="small">股票資料直接讀取 Google Sheets 既有計算結果。</div>
       <button class="outline-btn" type="button">前往股票管理</button>
     </div>
   </div>
@@ -193,7 +201,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbyl6tzaf7O1lNhfuOVEH7zJPrdg5LhAUj42y_gdzczqST9xxCZJHSXrjyVilHnwo2LYNQ/exec";
-const EXPECTED_API_VERSION="V2.5-INITIAL-HORIZONTAL-DAILY-GROWTH";
+const EXPECTED_API_VERSION="V2.6-GOALS-STOCKS";
 
 const $=id=>document.getElementById(id);
 
@@ -273,6 +281,8 @@ function render(data){
   renderGoals(data.goals||[]);
   renderStats(data);
   renderDailyStats(data.dailyAssetStats||[]);
+  renderGoalSettings(data.goalSettings||[]);
+  renderStockAssets(data.stockAssets||[]);
 
   $("lastUpdated").textContent=
     meta.latestDate
@@ -493,14 +503,9 @@ function renderGoals(goals){
         <div class="goal">
           <div class="goal-head">
             <span>${esc(g.label)}</span>
-            <span class="goal-right">
-              <b class="${rate!=null&&rate>=1?"good":""}">
-                ${pct(rate,1)}
-              </b>
-              <span>
-                ${money(g.current)} / ${money(g.target)}
-              </span>
-            </span>
+            <b class="${rate!=null&&rate>=1?"good":""}">
+              ${pct(rate,1)}
+            </b>
           </div>
           <div class="bar">
             <span class="${cls}" style="width:${width}%"></span>
@@ -509,8 +514,6 @@ function renderGoals(goals){
     })
     .join("");
 }
-
-let dailyStatsCache=[];
 
 function renderDailyStats(list){
   dailyStatsCache=Array.isArray(list)?list:[];
@@ -555,6 +558,50 @@ function updateDailyStatsTable(){
       : `<tr><td colspan="6" class="empty">目前沒有每日資產資料</td></tr>`
     }`;
 }
+
+function renderGoalSettings(list){
+  const rows=Array.isArray(list)?list:[];
+
+  $("goalSettingsTable").innerHTML=`
+    <tr>
+      <th>項目</th>
+      <th>本年度目標</th>
+      <th>2028 中期目標</th>
+      <th>2033 長期目標</th>
+    </tr>
+    ${rows.map(x=>`
+      <tr>
+        <td>${esc(x.label)}</td>
+        <td>${money(x.annualTarget)}</td>
+        <td>${pct(x.midTerm,1)}</td>
+        <td>${pct(x.longTerm,1)}</td>
+      </tr>
+    `).join("")}`;
+}
+
+function renderStockAssets(list){
+  const rows=Array.isArray(list)?list:[];
+
+  $("stockTable").innerHTML=`
+    <tr>
+      <th>代號</th>
+      <th>持有股數</th>
+      <th>單價</th>
+      <th>現值</th>
+    </tr>
+    ${rows.length
+      ? rows.map(x=>`
+        <tr>
+          <td>${esc(x.ticker)}</td>
+          <td>${x.shares==null?"—":Number(x.shares).toLocaleString("zh-TW",{maximumFractionDigits:4})}</td>
+          <td>${money(x.price)}</td>
+          <td>${money(x.value)}</td>
+        </tr>
+      `).join("")
+      : `<tr><td colspan="4" class="empty">目前沒有股票資產資料</td></tr>`
+    }`;
+}
+
 
 function renderStats(data){
   const meta=data?.meta||{};
