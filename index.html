@@ -373,30 +373,97 @@ async function loadDashboard(credential) {
     throw new Error("缺少 Google 登入憑證");
   }
 
-  const body = new URLSearchParams();
-  body.set("action", "dashboard");
-  body.set("credential", credential);
+  /*
+   * 不使用 fetch：Google Apps Script Web App 的跨來源回應
+   * 可能無法讓 GitHub Pages 直接讀取 CORS 回應。
+   *
+   * 改用「隱藏 iframe + POST form + postMessage」：
+   * 1. 表單把 credential POST 給 Apps Script。
+   * 2. Apps Script 驗證成功後回傳一個極小的 HtmlService 頁面。
+   * 3. 該頁面透過 postMessage 把結果傳回本頁。
+   */
+  const frame = document.createElement("iframe");
+  const nonce = (
+    window.crypto && window.crypto.randomUUID
+      ? window.crypto.randomUUID()
+      : String(Date.now()) + "_" + Math.random().toString(36).slice(2)
+  );
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-    },
-    body,
-    cache: "no-store"
+  frame.name = "asset_api_bridge_" + nonce.replace(/[^a-zA-Z0-9_-]/g, "");
+  frame.style.display = "none";
+  frame.setAttribute("aria-hidden", "true");
+  document.body.appendChild(frame);
+
+  let settled = false;
+  let timer = null;
+
+  const cleanup = () => {
+    window.removeEventListener("message", onMessage);
+    if (timer) clearTimeout(timer);
+    setTimeout(() => frame.remove(), 0);
+  };
+
+  const promise = new Promise((resolve, reject) => {
+    timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(new Error("連線逾時，無法取得資產資料。"));
+    }, 20000);
+
+    function onMessage(event) {
+      // 只接受剛建立的 iframe 傳回的訊息。
+      if (event.source !== frame.contentWindow) return;
+
+      const message = event.data;
+      if (!message || message.source !== "asset-overview-api") return;
+      if (message.nonce !== nonce) return;
+
+      if (settled) return;
+      settled = true;
+      cleanup();
+
+      if (!message.ok) {
+        reject(new Error(message.message || message.error || "API error"));
+        return;
+      }
+
+      resolve(message);
+    }
+
+    window.addEventListener("message", onMessage);
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = API_URL;
+    form.target = frame.name;
+    form.style.display = "none";
+
+    const addField = (name, value) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    };
+
+    addField("action", "dashboard");
+    addField("credential", credential);
+    addField("nonce", nonce);
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
   });
 
-  if (!res.ok) throw new Error("HTTP " + res.status);
+  const message = await promise;
 
-  const json = await res.json();
-  if (!json.ok) throw new Error(json.message || json.error || "API error");
-
-  render(json.data);
+  render(message.data);
   $("loginView").style.display = "none";
   $("home").style.display = "block";
   $("logoutBtn").style.display = "inline-block";
-  $("status").textContent = json.user && json.user.email
-    ? "已登入 · " + json.user.email
+  $("status").textContent = message.user && message.user.email
+    ? "已登入 · " + message.user.email
     : "資料已更新";
   $("status").classList.remove("error");
 }
