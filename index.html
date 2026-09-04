@@ -26,6 +26,23 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
   .daily-table-scroll{max-height:390px;overflow:auto}
   .stock-management-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
   .outline-btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 13px;color:var(--text);cursor:pointer}
+
+  /* V2.3：統計頁第二列並列 */
+  .stats-row-initial{grid-template-columns:minmax(0,1fr)}
+  .stats-row-goals{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:11px}
+  .stats-row-goals>.card{min-width:0}
+  @media (max-width:760px){
+    .stats-row-goals{grid-template-columns:1fr}
+  }
+
+  /* V2.4：每日資產統計期間選擇 */
+  .section-heading-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .range-select-wrap{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted)}
+  .range-select-wrap select{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 28px 7px 10px;color:var(--text);font-size:13px;cursor:pointer}
+  @media (max-width:520px){
+    .section-heading-row{align-items:flex-start}
+    .range-select-wrap span{display:none}
+  }
 </style>
 </head>
 <body>
@@ -47,7 +64,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
 </section>
 
 <section id="statsPage" class="page">
-  <div class="stats-grid" style="margin-top:11px">
+  <div class="stats-grid stats-row-initial" style="margin-top:11px">
     <div class="card">
       <div class="section-title">
         <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
@@ -58,7 +75,9 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
       </div>
       <div id="initialStats"></div>
     </div>
+  </div>
 
+  <div class="stats-grid stats-row-goals">
     <div class="card">
       <div class="section-title">
         <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
@@ -98,14 +117,25 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
   </div>
 
   <div class="card full">
-    <div class="section-title">
-      <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M5 4v16"></path>
-        <path d="M10 4v16"></path>
-        <path d="M15 4v16"></path>
-        <path d="M19 7h-2"></path>
-      </svg>
-      每日資產統計
+    <div class="section-heading-row">
+      <div class="section-title">
+        <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 4v16"></path>
+          <path d="M10 4v16"></path>
+          <path d="M15 4v16"></path>
+          <path d="M19 7h-2"></path>
+        </svg>
+        每日資產統計
+      </div>
+      <label class="range-select-wrap" aria-label="每日資產統計期間">
+        <span>顯示</span>
+        <select id="dailyRange">
+          <option value="7" selected>近 7 天</option>
+          <option value="15">近 15 天</option>
+          <option value="30">近 30 天</option>
+          <option value="all">全部</option>
+        </select>
+      </label>
     </div>
     <div class="table-scroll daily-table-scroll">
       <table id="dailyTable"></table>
@@ -128,16 +158,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
     </div>
   </div>
 
-  <div class="card full">
-    <div class="section-title">
-      <svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 5h16v14H4z"></path>
-        <path d="M8 9h8M8 13h8M8 17h8"></path>
-      </svg>
-      資產歷史紀錄
-    </div>
-    <div class="small">完整每日資料同時作為資產歷史紀錄來源。</div>
-  </div>
+
 </section>
 </main>
 
@@ -465,11 +486,25 @@ function renderGoals(goals){
     .join("");
 }
 
+let dailyStatsCache=[];
+
 function renderDailyStats(list){
-  const rows=Array.isArray(list)?list:[];
-  const sorted=[...rows].sort(
+  dailyStatsCache=Array.isArray(list)?list:[];
+  updateDailyStatsTable();
+}
+
+function updateDailyStatsTable(){
+  const rows=[...dailyStatsCache].sort(
     (a,b)=>String(b.date).localeCompare(String(a.date))
   );
+
+  const value=$("dailyRange")?.value||"7";
+
+  let filtered=rows;
+
+  if(value!=="all"){
+    filtered=rows.slice(0,Number(value));
+  }
 
   $("dailyTable").innerHTML=`
     <tr>
@@ -480,18 +515,21 @@ function renderDailyStats(list){
       <th>總資產</th>
       <th>成長率</th>
     </tr>
-    ${sorted.map(x=>`
-      <tr>
-        <td>${dateText(x.date)}</td>
-        <td>${money(x.stock)}</td>
-        <td>${money(x.savings)}</td>
-        <td>${money(x.cash)}</td>
-        <td>${money(x.amount)}</td>
-        <td class="${Number(x.growth)>=0?'good':'bad'}">
-          ${pct(x.growth,2)}
-        </td>
-      </tr>
-    `).join("")}`;
+    ${filtered.length
+      ? filtered.map(x=>`
+        <tr>
+          <td>${dateText(x.date)}</td>
+          <td>${money(x.stock)}</td>
+          <td>${money(x.savings)}</td>
+          <td>${money(x.cash)}</td>
+          <td>${money(x.amount)}</td>
+          <td class="${Number(x.growth)>=0?'good':'bad'}">
+            ${pct(x.growth,2)}
+          </td>
+        </tr>
+      `).join("")
+      : `<tr><td colspan="6" class="empty">目前沒有每日資產資料</td></tr>`
+    }`;
 }
 
 function renderStats(data){
@@ -598,6 +636,11 @@ async function loadDashboard(){
 
   render(result.data);
 }
+
+$("dailyRange").addEventListener(
+  "change",
+  updateDailyStatsTable
+);
 
 function load(){
   loadDashboard().catch(err=>{
