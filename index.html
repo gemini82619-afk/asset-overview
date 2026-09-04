@@ -408,16 +408,28 @@ async function loadDashboard(credential) {
       if (settled) return;
       settled = true;
       cleanup();
-      reject(new Error("連線逾時，無法取得資產資料。"));
+      reject(new Error("Apps Script 沒有回傳驗證結果。請確認 Web App 已重新部署最新版本。"));
     }, 20000);
 
     function onMessage(event) {
-      // 只接受剛建立的 iframe 傳回的訊息。
-      if (event.source !== frame.contentWindow) return;
-
       const message = event.data;
+
+      // 不再只依賴 event.source。Apps Script HtmlService
+      // 可能經過額外的 iframe / redirect 層，導致 source
+      // 不一定等於最外層建立的 frame.contentWindow。
+      // 安全性改由：
+      // 1. 固定的訊息來源標記
+      // 2. 每次請求隨機 nonce
+      // 3. 只接受 Google Apps Script 的來源
       if (!message || message.source !== "asset-overview-api") return;
       if (message.nonce !== nonce) return;
+
+      const allowedOrigins = new Set([
+        "https://script.google.com",
+        "https://script.googleusercontent.com"
+      ]);
+
+      if (!allowedOrigins.has(event.origin)) return;
 
       if (settled) return;
       settled = true;
