@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>資產總覽</title>
+<style>
+:root {
+  --bg: #f5f7fb;
+  --card: #fff;
+  --text: #182230;
+  --muted: #7a8594;
+  --line: #e7ebf1;
+  --accent: #315efb;
+  --accent-soft: #edf2ff;
+  --shadow: 0 8px 28px rgba(22, 34, 51, .08);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.app {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 22px 18px 104px;
+}
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:18px;
+}
+h1 { font-size:22px; margin:0; }
+.status {
+  font-size:12px; color:var(--muted);
+}
+.status.error { color:#c43d3d; }
+
+.grid {
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap:14px;
+}
+.card {
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+.card h2 {
+  font-size:15px; margin:0 0 14px;
+}
+.big {
+  font-size:32px; font-weight:750; letter-spacing:-.02em;
+}
+.sub {
+  color:var(--muted); font-size:13px; margin-top:7px;
+}
+
+.high {
+  display:flex; justify-content:space-between; align-items:flex-end; gap:12px;
+}
+.high-date { text-align:right; color:var(--muted); font-size:13px; }
+
+.allocation-wrap {
+  display:flex; align-items:center; gap:22px;
+}
+.donut {
+  width:132px; height:132px; flex:0 0 auto;
+  border-radius:50%;
+  background: conic-gradient(
+    var(--accent) 0 var(--p1),
+    #72a6ff var(--p1) var(--p2),
+    #cbd8ea var(--p2) 100%
+  );
+  position:relative;
+}
+.donut::after {
+  content:"";
+  position:absolute; inset:31px;
+  background:var(--card);
+  border-radius:50%;
+}
+.legend { flex:1; display:grid; gap:10px; }
+.legend-row {
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:14px;
+}
+.legend-name { display:flex; align-items:center; gap:8px; }
+.dot { width:9px; height:9px; border-radius:50%; background:var(--accent); }
+.dot.two { background:#72a6ff; }
+.dot.three { background:#cbd8ea; }
+
+.chart-box { min-height:250px; }
+.bar-chart { display:grid; gap:10px; }
+.bar-row {
+  display:grid;
+  grid-template-columns:54px 1fr 100px;
+  gap:8px; align-items:center;
+  font-size:12px;
+}
+.bar-track { height:10px; background:#edf0f5; border-radius:99px; overflow:hidden; }
+.bar-fill { height:100%; background:var(--accent); border-radius:99px; }
+.bar-value { text-align:right; }
+
+.goal-list { display:grid; gap:15px; }
+.goal-head {
+  display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+}
+.goal-name { font-size:14px; font-weight:650; }
+.goal-rate { font-size:18px; font-weight:750; }
+.goal-amount {
+  margin-top:3px;
+  font-size:18px; /* 與百分比相同 */
+  font-weight:650;
+  text-align:right;
+}
+.progress {
+  height:9px; margin-top:8px;
+  background:#edf0f5; border-radius:99px; overflow:hidden;
+}
+.progress > div { height:100%; background:var(--accent); }
+
+.month-change {
+  display:flex; align-items:flex-end; justify-content:space-between;
+}
+.change-rate { font-size:18px; font-weight:750; }
+
+.bottom-nav {
+  position:fixed; left:50%; bottom:12px; transform:translateX(-50%);
+  width:min(560px, calc(100% - 24px));
+  background:rgba(255,255,255,.96);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:0 12px 35px rgba(22,34,51,.15);
+  display:grid; grid-template-columns:repeat(3,1fr);
+  padding:7px;
+  z-index:20;
+}
+.nav-btn {
+  border:0; background:transparent; border-radius:13px;
+  padding:11px 6px; font-size:14px; color:var(--muted);
+}
+.nav-btn.active { background:var(--accent-soft); color:var(--accent); font-weight:700; }
+
+.empty {
+  color:var(--muted); font-size:13px; padding:18px 0;
+}
+
+.modal-backdrop {
+  position:fixed; inset:0; background:rgba(10,18,30,.35);
+  display:none; align-items:center; justify-content:center;
+  padding:18px; z-index:30;
+}
+.modal {
+  width:min(430px, 100%); background:#fff; border-radius:20px;
+  padding:20px; box-shadow:0 20px 60px rgba(0,0,0,.2);
+}
+.modal-head { display:flex; justify-content:space-between; align-items:center; }
+.modal h3 { margin:0; }
+.close {
+  border:0; background:#f1f3f6; width:34px; height:34px; border-radius:50%;
+  font-size:20px;
+}
+.field { margin-top:14px; }
+.field label { display:block; font-size:13px; margin-bottom:6px; color:var(--muted); }
+.field input {
+  width:100%; padding:11px 12px; border:1px solid var(--line);
+  border-radius:10px; font-size:15px;
+}
+.modal-note { color:var(--muted); font-size:12px; margin-top:12px; line-height:1.5; }
+button { cursor:pointer; }
+@media (max-width: 720px) {
+  .grid { grid-template-columns:1fr; }
+  .big { font-size:28px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <h1>資產總覽</h1>
+    <div id="status" class="status">讀取中…</div>
+  </div>
+
+  <main id="home">
+    <div class="grid">
+      <section class="card">
+        <h2>總資產</h2>
+        <div id="totalAsset" class="big">—</div>
+      </section>
+
+      <section class="card">
+        <h2>歷史高點</h2>
+        <div class="high">
+          <div id="highAmount" class="big">—</div>
+          <div id="highDate" class="high-date">—</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>本月變化</h2>
+        <div id="monthlyChange"></div>
+      </section>
+
+      <section class="card">
+        <h2>資產配置</h2>
+        <div id="allocation" class="allocation-wrap"></div>
+      </section>
+
+      <section class="card chart-box">
+        <h2>資產成長趨勢</h2>
+        <div id="trend" class="bar-chart"></div>
+      </section>
+
+      <section class="card">
+        <h2>資產目標達成率</h2>
+        <div id="goals" class="goal-list"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-nav="home">首頁</button>
+  <button class="nav-btn" data-nav="input">輸入</button>
+  <button class="nav-btn" data-nav="stats">統計</button>
+</nav>
+
+<div id="modalBackdrop" class="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h3>新增資產紀錄</h3>
+      <button id="closeModal" class="close">×</button>
+    </div>
+    <div class="field"><label>日期</label><input type="date" id="inputDate"></div>
+    <div class="field"><label>股票</label><input type="number" id="inputStock" min="0" step="0.01"></div>
+    <div class="field"><label>員工儲蓄會</label><input type="number" id="inputSavings" min="0" step="0.01"></div>
+    <div class="field"><label>現金</label><input type="number" id="inputCash" min="0" step="0.01"></div>
+    <div class="modal-note">V1 為唯讀測試版；目前按下儲存不會寫入 Google Sheets。</div>
+  </div>
+</div>
+
+<script>
+/*
+ * === 必填設定 ===
+ * 部署 Apps Script 網路應用程式後，把 URL 貼到這裡。
+ */
+const API_URL = "https://script.google.com/macros/s/AKfycbyl6tzaf7O1lNhfuOVEH7zJPrdg5LhAUj42y_gdzczqST9xxCZJHSXrjyVilHnwo2LYNQ/exec";
+
+const $ = (id) => document.getElementById(id);
+
+function money(n) {
+  if (n === null || n === undefined || !Number.isFinite(Number(n))) return "—";
+  return "NT$" + Number(n).toLocaleString("zh-TW", {
+    maximumFractionDigits: 0
+  });
+}
+
+function percent(n) {
+  if (n === null || n === undefined || !Number.isFinite(Number(n))) return "—";
+  return (Number(n) * 100).toFixed(1) + "%";
+}
+
+function render(data) {
+  $("totalAsset").textContent = money(data.totalAsset);
+
+  $("highAmount").textContent = money(data.historicalHigh.amount);
+  $("highDate").textContent = data.historicalHigh.date || "—";
+
+  if (data.monthlyChange) {
+    $("monthlyChange").innerHTML = `
+      <div class="month-change">
+        <div>
+          <div class="big">${money(data.monthlyChange.amount)}</div>
+          <div class="sub">${data.monthlyChange.month} 月月結餘</div>
+        </div>
+        <div class="change-rate">${percent(data.monthlyChange.rate)}</div>
+      </div>`;
+  } else {
+    $("monthlyChange").innerHTML = `<div class="empty">目前沒有可用的月統計資料</div>`;
+  }
+
+  const a = data.allocation;
+  const total = Number(data.totalAsset) || 0;
+  const p1 = total ? Number(a.stock.amount) / total * 100 : 0;
+  const p2 = total ? (Number(a.stock.amount) + Number(a.savings.amount)) / total * 100 : 0;
+
+  $("allocation").innerHTML = `
+    <div class="donut" style="--p1:${p1}%;--p2:${p2}%"></div>
+    <div class="legend">
+      ${legendRow(a.stock.label, a.stock.amount, total, "")}
+      ${legendRow(a.savings.label, a.savings.amount, total, "two")}
+      ${legendRow(a.cash.label, a.cash.amount, total, "three")}
+    </div>`;
+
+  const trend = (data.assetTrend || []).filter(x => x.asset !== null);
+  const max = Math.max(...trend.map(x => Number(x.asset)), 1);
+  $("trend").innerHTML = trend.length ? trend.map(x => `
+    <div class="bar-row">
+      <div>${x.year}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0, Number(x.asset)/max*100)}%"></div></div>
+      <div class="bar-value">${money(x.asset)}</div>
+    </div>`).join("") : `<div class="empty">目前沒有年度資料</div>`;
+
+  $("goals").innerHTML = (data.goalProgress || []).map(g => {
+    const rate = g.achievementRate;
+    const width = rate === null ? 0 : Math.min(Math.max(rate * 100, 0), 100);
+    return `
+      <div>
+        <div class="goal-head">
+          <div class="goal-name">${escapeHtml(g.label)}</div>
+          <div class="goal-rate">${percent(rate)}</div>
+        </div>
+        <div class="goal-amount">${money(g.current)} / ${money(g.target)}</div>
+        <div class="progress"><div style="width:${width}%"></div></div>
+      </div>`;
+  }).join("");
+}
+
+function legendRow(label, amount, total, extra) {
+  const p = total ? Number(amount) / total * 100 : 0;
+  return `
+    <div class="legend-row">
+      <div class="legend-name"><span class="dot ${extra}"></span>${escapeHtml(label)}</div>
+      <strong>${p.toFixed(0)}%</strong>
+    </div>`;
+}
+
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[c]));
+}
+
+async function loadDashboard() {
+  if (!API_URL || API_URL.includes("請貼上")) {
+    $("status").textContent = "尚未設定 API URL";
+    $("status").classList.add("error");
+    return;
+  }
+
+  try {
+    const url = API_URL + (API_URL.includes("?") ? "&" : "?") + "action=dashboard";
+    const res = await fetch(url, { method: "GET", cache: "no-store" });
+
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.message || json.error || "API error");
+
+    render(json.data);
+    $("status").textContent = "資料已更新";
+  } catch (err) {
+    console.error(err);
+    $("status").textContent = "資料讀取失敗";
+    $("status").classList.add("error");
+  }
+}
+
+function openInputModal() {
+  $("inputDate").value = new Date().toISOString().slice(0,10);
+  $("modalBackdrop").style.display = "flex";
+}
+
+function closeInputModal() {
+  $("modalBackdrop").style.display = "none";
+}
+
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const nav = btn.dataset.nav;
+    document.querySelectorAll(".nav-btn").forEach(x => x.classList.remove("active"));
+    btn.classList.add("active");
+
+    if (nav === "input") {
+      openInputModal();
+      document.querySelector('[data-nav="home"]').classList.add("active");
+      btn.classList.remove("active");
+    } else if (nav === "stats") {
+      // V1 先保留導覽位置，統計頁下一階段接上。
+      alert("統計頁將在下一階段接入。");
+      document.querySelector('[data-nav="home"]').classList.add("active");
+      btn.classList.remove("active");
+    }
+  });
+});
+
+$("closeModal").addEventListener("click", closeInputModal);
+$("modalBackdrop").addEventListener("click", e => {
+  if (e.target === $("modalBackdrop")) closeInputModal();
+});
+
+loadDashboard();
+</script>
+</body>
+</html>
