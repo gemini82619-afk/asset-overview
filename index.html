@@ -6,27 +6,15 @@
 <title>資產總覽</title>
 <style>
 *{box-sizing:border-box}
-:root{
-  --text:#182a43;--muted:#718096;--line:#d9e2ea;--bg:#eef4f8;--card:#fff;
-  --green:#17946c;--red:#ef4444;--blue:#3182ce;--gold:#f2a900;--nav:#14263a;
-}
+:root{--text:#182a43;--muted:#718096;--line:#d9e2ea;--bg:#eef4f8;--card:#fff;--green:#17946c;--red:#ef4444;--blue:#3182ce;--gold:#f2a900}
 html,body{margin:0;min-height:100%}
-body{font-family:"Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:78px}
-button,input{font:inherit}.app{min-height:calc(100vh - 78px)}
-.main{max-width:1500px;margin:auto;padding:18px 22px 42px}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
-.header-left{display:flex;gap:12px;align-items:center}.header-logo{width:42px;height:42px;border-radius:12px;background:#fff;display:grid;place-items:center;font-size:22px;box-shadow:0 2px 8px #b8c5cf55}
-h1{margin:0;font-size:23px}.subtitle{color:var(--muted);font-size:13px;margin-top:3px}.update{color:#7a8794;font-size:12px}.refresh{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;margin-left:7px}
-.page{display:none}.page.active{display:block}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.card{background:var(--card);border:1px solid #dbe5ec;border-radius:11px;padding:17px;box-shadow:0 2px 8px #9eb0bd22}.kpi{min-height:135px}
-.kpi:nth-child(1){background:linear-gradient(135deg,#effcf7,#fff)}.kpi:nth-child(2){background:linear-gradient(135deg,#fff6ee,#fff)}.kpi:nth-child(3){background:linear-gradient(135deg,#eff6ff,#fff)}
-.kpi-title{font-weight:800;font-size:17px}.kpi-value{font-size:27px;font-weight:900;margin:13px 0 7px}.growth{color:var(--green);font-size:17px;font-weight:800}.small{font-size:12px;color:var(--muted)}
-.grid-home{display:grid;grid-template-columns:1.05fr 1.18fr .9fr;gap:11px;margin-top:11px}.section-title{font-size:17px;font-weight:850;display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.donut-wrap{display:flex;align-items:center;gap:18px}.donut{width:170px;height:170px;border-radius:50%;background:conic-gradient(var(--gold) 0 61%,var(--red) 61% 92%,var(--blue) 92% 100%);position:relative;flex:none}.donut:after{content:"";position:absolute;inset:45px;background:#fff;border-radius:50%}
-.legend{flex:1}.legend-row{display:grid;grid-template-columns:12px 1fr auto;gap:7px;align-items:center;margin:12px 0;font-size:13px}.dot{width:11px;height:11px;border-radius:50%}.pct{font-weight:800}.gold-text{color:var(--gold)}.red-text{color:var(--red)}.blue-text{color:var(--blue)}
-.chart{height:245px}.chart svg{width:100%;height:100%;display:block}.chart-grid{stroke:#d9e2ea;stroke-width:1}.chart-line{fill:none;stroke:var(--red);stroke-width:3}.chart-point{fill:var(--red)}.chart-label{font-size:11px;fill:#718096}.chart-value{font-size:10px;fill:#182a43;font-weight:700}
-.goal{margin:17px 0}.goal-head{display:flex;justify-content:space-between;align-items:flex-start;font-weight:800;font-size:14px;gap:12px}.goal-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:14px;font-weight:600;color:var(--muted);white-space:nowrap;line-height:1.25}.goal-right b{font-size:14px;order:-1}.good{color:var(--green);font-weight:800}.bad{color:var(--red);font-weight:800}.bar{height:13px;border-radius:99px;background:#e4e9ee;overflow:hidden}.bar span{display:block;height:100%;border-radius:99px}.gold{background:var(--gold)}.red{background:var(--red)}.blue{background:var(--blue)}.goal-value{text-align:right;margin-top:4px;color:var(--green);font-weight:800;font-size:13px}
-.initial-card{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat-box{background:#f5f8fa;border-radius:9px;padding:14px}.stat-label{font-size:12px;color:var(--muted)}.stat-value{font-size:22px;font-weight:900;margin-top:6px}.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.full{margin-top:11px}.long-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.mini-goal{background:#f1f6f9;border-radius:8px;padding:11px}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px}th{font-weight:800;background:#f4f8fa}th,td{border:1px solid #dbe4ea;padding:7px 6px;text-align:center;white-space:nowrap}.empty{padding:30px;text-align:center;color:var(--muted)}
+body{font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:78px}
+button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 42px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.header-left{display:flex;gap:12px;align-items:center}.header-logo{width:42px;height:42px;border-radius:12px;background:#fff;display:grid;place-items:center;font-size:22px;box-shadow:0 2px 8px #b8c5cf55}h1{margin:0;font-size:23px}.subtitle{color:var(--muted);font-size:13px;margin-top:3px}.update{color:#7a8794;font-size:12px}.refresh{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;margin-left:7px}
+.page{display:none}.page.active{display:block}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.card{background:var(--card);border:1px solid #dbe5ec;border-radius:11px;padding:17px;box-shadow:0 2px 8px #9eb0bd22}.kpi{min-height:135px}.kpi:nth-child(1){background:linear-gradient(135deg,#effcf7,#fff)}.kpi:nth-child(2){background:linear-gradient(135deg,#fff6ee,#fff)}.kpi:nth-child(3){background:linear-gradient(135deg,#eff6ff,#fff)}.kpi-title{font-weight:800;font-size:17px}.kpi-value{font-size:27px;font-weight:900;margin:13px 0 7px}.growth{color:var(--green);font-size:17px;font-weight:800}.negative{color:var(--red)}.small{font-size:12px;color:var(--muted)}
+.grid-home{display:grid;grid-template-columns:1.05fr 1.18fr .9fr;gap:11px;margin-top:11px}.section-title{font-size:17px;font-weight:850;display:flex;align-items:center;gap:8px;margin-bottom:12px}.donut-wrap{display:flex;align-items:center;gap:18px;min-height:170px}.donut{width:170px;height:170px;border-radius:50%;background:#e7edf2;position:relative;flex:none}.donut:after{content:"";position:absolute;inset:45px;background:#fff;border-radius:50%}.legend{flex:1}.legend-row{display:grid;grid-template-columns:12px 1fr auto;gap:7px;align-items:center;margin:12px 0;font-size:13px}.dot{width:11px;height:11px;border-radius:50%}.gold-text{color:var(--gold)}.red-text{color:var(--red)}.blue-text{color:var(--blue)}.pct{font-weight:800}
+.chart{height:225px}.chart svg{width:100%;height:100%;display:block}.chart-grid{stroke:#d9e2ea;stroke-width:1}.chart-line{fill:none;stroke:#df492f;stroke-width:3}.chart-point{fill:#df492f}.chart-label{font-size:11px;fill:#718096}.chart-value{font-size:10px;fill:#182a43;font-weight:700}
+.goal{margin:17px 0}.goal-head{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:14px;gap:12px}.goal-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:14px;font-weight:600;color:var(--muted);white-space:nowrap;line-height:1.25}.goal-right b{font-size:14px;order:-1}.bar{height:13px;border-radius:99px;background:#e4e9ee;overflow:hidden}.bar span{display:block;height:100%;border-radius:99px}.gold{background:var(--gold)}.red{background:var(--red)}.blue{background:var(--blue)}.good{color:var(--green);font-weight:800}.bad{color:var(--red);font-weight:800}
+.initial-card{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat-box{background:#f5f8fa;border-radius:9px;padding:14px}.stat-label{font-size:12px;color:var(--muted)}.stat-value{font-size:22px;font-weight:900;margin-top:6px}.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.full{margin-top:11px}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12px}th{font-weight:800;background:#f4f8fa}th,td{border:1px solid #dbe4ea;padding:7px 6px;text-align:center;white-space:nowrap}.empty{padding:30px;text-align:center;color:var(--muted)}
 .bottom-nav{position:fixed;z-index:20;bottom:0;left:0;right:0;height:76px;background:rgba(255,255,255,.97);border-top:1px solid #d5e0e8;display:flex;justify-content:center;box-shadow:0 -3px 14px #65788822}.nav-inner{width:min(620px,100%);display:grid;grid-template-columns:repeat(3,1fr)}.nav-btn{border:0;background:none;color:#718096;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:700}.nav-btn .icon{font-size:23px;line-height:1}.nav-btn.active{color:#173b61}.nav-btn.active .icon{transform:translateY(-1px)}
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(15,31,48,.48);z-index:50;align-items:center;justify-content:center;padding:18px}.modal-backdrop.show{display:flex}.modal{width:min(500px,100%);background:#fff;border-radius:15px;box-shadow:0 20px 70px #0d213844;overflow:hidden}.modal-head{padding:17px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h2{margin:0;font-size:19px}.close{border:0;background:#eef3f6;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:20px;color:#536273}.form{padding:18px}.field{margin-bottom:14px}.field label{display:block;font-weight:800;font-size:13px;margin-bottom:6px}.field input{width:100%;padding:11px 12px;border:1px solid #ccd8e1;border-radius:8px;outline:none}.hint{font-size:12px;color:var(--muted);background:#f5f8fa;border-radius:8px;padding:9px;margin-bottom:15px}.toast{position:fixed;z-index:80;bottom:92px;left:50%;transform:translateX(-50%);background:#17324c;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;display:none}.toast.show{display:block}
 @media(max-width:1050px){.grid-home{grid-template-columns:1fr 1fr}.grid-home>.card:last-child{grid-column:1/-1}}
@@ -34,7 +22,7 @@ h1{margin:0;font-size:23px}.subtitle{color:var(--muted);font-size:13px;margin-to
 </style>
 </head>
 <body>
-<div class="app"><main class="main">
+<main class="main">
 <header class="header"><div class="header-left"><div class="header-logo">◉</div><div><h1>資產總覽</h1><div class="subtitle">掌握資產，規劃更好的未來</div></div></div><div class="update"><span id="lastUpdated">資料載入中…</span> <button class="refresh" id="refreshBtn">⟳ 更新資料</button></div></header>
 
 <section id="homePage" class="page active">
@@ -56,7 +44,7 @@ h1{margin:0;font-size:23px}.subtitle{color:var(--muted);font-size:13px;margin-to
   <div class="stats-grid" style="margin-top:11px"><div class="card"><div class="section-title">◎ 長期目標</div><div id="longGoals"></div></div><div class="card"><div class="section-title">📈 目標設定</div><div class="small">中期與長期目標資料沿用 Google Sheets 現有計算結果。</div></div></div>
   <div class="card full"><div class="section-title">▥ 每月資產統計（本年度）</div><div class="table-scroll"><table id="monthlyTable"></table></div></div>
 </section>
-</main></div>
+</main>
 
 <nav class="bottom-nav"><div class="nav-inner"><button class="nav-btn active" data-nav="home"><span class="icon">⌂</span><span>首頁</span></button><button class="nav-btn" data-nav="input"><span class="icon">＋</span><span>輸入</span></button><button class="nav-btn" data-nav="stats"><span class="icon">▥</span><span>統計</span></button></div></nav>
 
@@ -72,66 +60,87 @@ function dateText(s){if(!s)return"—";return String(s).replaceAll("-","/")}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function render(data){
   $("totalAsset").textContent=money(data.totalAsset);
-  $("totalGrowth").textContent=data.totalGrowthRate!=null?((data.totalGrowthRate>=0?"▲ ":"▼ ")+pct(Math.abs(data.totalGrowthRate),2)):"—";
+  const tg=data.totalGrowthRate;
+  $("totalGrowth").textContent=tg!=null?((tg>=0?"▲ ":"▼ ")+pct(Math.abs(tg),2)):"—";
+  $("totalGrowth").className="growth"+(tg!=null&&tg<0?" negative":"");
   $("initialSince").textContent=data.initialDate?`(自 ${dateText(data.initialDate)} 起)`:"—";
-  $("highAmount").textContent=money(data.historicalHigh.amount);
-  $("highDate").textContent=dateText(data.historicalHigh.date);
+
+  $("highAmount").textContent=money(data.historicalHigh?.amount);
+  $("highDate").textContent=dateText(data.historicalHigh?.date);
 
   const m=data.monthlyChange;
   if(m){
     const positive=Number(m.rate)>=0;
     $("monthlyRate").textContent=(positive?"▲ ":"▼ ")+pct(Math.abs(m.rate),2);
+    $("monthlyRate").className="kpi-value growth"+(positive?"":" negative");
     $("monthlyAmount").textContent=(positive?"+ ":"- ")+money(Math.abs(m.changeAmount));
-    $("monthlyRange").textContent=m.range||`${m.month} 月`;
+    $("monthlyAmount").className="growth"+(positive?"":" negative");
+    $("monthlyRange").textContent=`(${dateText(m.previousDate)} → ${dateText(m.latestDate)})`;
+  }else{
+    $("monthlyRate").textContent="—";$("monthlyAmount").textContent="—";$("monthlyRange").textContent="—";
   }
 
-  const a=data.allocation||{};
-  const p1=(Number(a.stock?.percentage)||0)*100;
-  const p2=p1+(Number(a.savings?.percentage)||0)*100;
-  const p3=Math.max(0,100-p2);
-  $("allocation").innerHTML=`<div class="donut" style="background:conic-gradient(var(--gold) 0 ${p1}%,var(--red) ${p1}% ${p2}%,var(--blue) ${p2}% ${p2+p3}%)"></div><div class="legend">${legendRow(a.stock?.label||"股票",a.stock?.percentage,"gold-text")}${legendRow(a.savings?.label||"員工儲蓄會",a.savings?.percentage,"red-text")}${legendRow(a.cash?.label||"緊急備用金",a.cash?.percentage,"blue-text")}</div>`;
-
+  renderAllocation(data.allocation||{});
   renderTrend(data.history||[]);
-
-  $("goals").innerHTML=(data.goalProgress||[]).map((g,i)=>{const rate=g.achievementRate;const width=rate==null?0:Math.min(Math.max(rate*100,0),100);const cls=i===0?"gold":i===1?"red":"blue";return `<div class="goal"><div class="goal-head"><span>${esc(g.label)}</span><span class="goal-right"><b class="${rate!=null&&rate>=1?"good":""}">${pct(rate)}</b><span>${money(g.current)} / ${money(g.target)}</span></span></div><div class="bar"><span class="${cls}" style="width:${width}%"></span></div></div>`}).join("");
-
+  renderGoals(data.goalProgress||[]);
   renderStats(data);
   $("lastUpdated").textContent=data.latestDate?`最後更新：${dateText(data.latestDate)}`:"資料已更新";
+}
+function renderAllocation(a){
+  const p1=Number(a.stock?.percentage)*100;
+  const p2=p1+Number(a.savings?.percentage)*100;
+  const p3=p2+Number(a.cash?.percentage)*100;
+  const ok=[p1,p2,p3].every(Number.isFinite);
+  const end1=ok?p1:0,end2=ok?p2:0,end3=ok?p3:0;
+  const donutBg=ok?`conic-gradient(var(--gold) 0 ${end1}%,var(--red) ${end1}% ${end2}%,var(--blue) ${end2}% ${end3}%)`:"#e7edf2";
+  $("allocation").innerHTML=`<div class="donut" style="background:${donutBg}"></div><div class="legend">${legendRow(a.stock?.label||"股票",a.stock?.percentage,"gold-text")}${legendRow(a.savings?.label||"員工儲蓄會",a.savings?.percentage,"red-text")}${legendRow(a.cash?.label||"緊急備用金",a.cash?.percentage,"blue-text")}</div>`;
 }
 function legendRow(label,ratio,cls){return `<div class="legend-row"><i class="dot ${cls}" style="background:currentColor"></i><span>${esc(label)}</span><span class="pct ${cls}">${pct(ratio,0)}</span></div>`}
 function renderTrend(history){
   const pts=(history||[]).filter(x=>x.date&&x.asset!=null);
   if(!pts.length){$("trend").innerHTML=`<div class="empty">目前沒有歷史資產資料</div>`;return;}
-  const w=700,h=245,left=58,right=16,top=16,bottom=30,iw=w-left-right,ih=h-top-bottom;
-  const vals=pts.map(x=>Number(x.asset)); const min=Math.min(...vals),max=Math.max(...vals); const span=max-min||1;
-  const y=v=>top+(max-v)/span*ih; const x=i=>left+(pts.length===1?iw/2:i/(pts.length-1)*iw);
+  const w=500,h=220,left=55,right=10,top=15,bottom=15,iw=w-left-right,ih=h-top-bottom;
+  const vals=pts.map(x=>Number(x.asset));
+  let min=Math.min(...vals),max=Math.max(...vals);
+  const pad=Math.max((max-min)*0.08,100000);min=Math.max(0,min-pad);max=max+pad;
+  const span=max-min||1;
+  const y=v=>top+(max-v)/span*ih;
+  const x=i=>left+(pts.length===1?iw/2:i/(pts.length-1)*iw);
   const line=pts.map((p,i)=>`${x(i).toFixed(1)},${y(Number(p.asset)).toFixed(1)}`).join(" ");
-  const grid=[0,.25,.5,.75,1].map(t=>{const yy=top+t*ih;const val=max-t*span;return `<line class="chart-grid" x1="${left}" y1="${yy}" x2="${w-right}" y2="${yy}"/><text class="chart-label" x="2" y="${yy+4}">${moneyShort(val)}</text>`}).join("");
-  const yearGroups=[];pts.forEach((p,i)=>{const yr=String(p.date).slice(0,4);if(!yearGroups.some(g=>g.year===yr))yearGroups.push({year:yr,i})});
-  const labels=yearGroups.map(g=>`<text class="chart-label" x="${x(g.i)-12}" y="${h-5}">${g.year}</text>`).join("");
-  const points=pts.map((p,i)=>`<circle class="chart-point" cx="${x(i)}" cy="${y(Number(p.asset))}" r="2.7"/>`).join("");
+  const grid=[0,.2,.4,.6,.8,1].map(t=>{const yy=top+t*ih;const val=max-t*span;return `<line class="chart-grid" x1="${left}" y1="${yy}" x2="${w-right}" y2="${yy}"/><text class="chart-label" x="4" y="${yy+4}">${moneyShort(val)}</text>`}).join("");
+  const years=[];pts.forEach((p,i)=>{const yr=String(p.date).slice(0,4);if(!years.some(y=>y.year===yr))years.push({year:yr,i})});
+  const labels=years.map(g=>`<text class="chart-label" x="${Math.max(0,Math.min(w-38,x(g.i)-12))}" y="${h-1}">${g.year}</text>`).join("");
+  const points=pts.length<=90?pts.map((p,i)=>`<circle class="chart-point" cx="${x(i)}" cy="${y(Number(p.asset))}" r="2"/>`).join(""):"";
   const last=pts[pts.length-1];
-  const annotation=`<text class="chart-value" x="${Math.max(left,Math.min(w-92,x(pts.length-1)-70))}" y="${Math.max(13,y(Number(last.asset))-9)}">${money(last.asset)}</text>`;
+  const annotation=`<text class="chart-value" x="${Math.max(left,Math.min(w-88,x(pts.length-1)-72))}" y="${Math.max(12,y(Number(last.asset))-8)}">${money(last.asset)}</text>`;
   $("trend").innerHTML=`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${grid}<polyline class="chart-line" points="${line}"/>${points}${annotation}${labels}</svg>`;
 }
-function moneyShort(v){if(v>=1000000)return"NT$"+(v/1000000).toFixed(1)+"M";if(v>=1000)return"NT$"+(v/1000).toFixed(0)+"K";return money(v)}
+function moneyShort(v){if(v>=1000000)return"NT$"+(v/1000000).toFixed(1)+"M";if(v>=1000)return"NT$"+Math.round(v/1000)+"K";return money(v)}
+function renderGoals(goals){
+  $("goals").innerHTML=(goals||[]).map((g,i)=>{
+    const rate=g.achievementRate;const width=rate==null?0:Math.min(Math.max(rate*100,0),100);const cls=i===0?"gold":i===1?"red":"blue";
+    return `<div class="goal"><div class="goal-head"><span>${esc(g.label)}</span><span class="goal-right"><b class="${rate!=null&&rate>=1?"good":""}">${pct(rate,1)}</b><span>${money(g.current)} / ${money(g.target)}</span></span></div><div class="bar"><span class="${cls}" style="width:${width}%"></span></div></div>`
+  }).join("");
+}
 function renderStats(data){
   $("initialStats").innerHTML=`<div class="stat-box"><div class="stat-label">初始日期</div><div class="stat-value">${dateText(data.initialDate)}</div></div><div class="stat-box"><div class="stat-label">初始資產</div><div class="stat-value">${money(data.initialAsset)}</div></div><div class="stat-box"><div class="stat-label">總成長率</div><div class="stat-value good">${pct(data.totalGrowthRate,2)}</div></div>`;
-  const mid=data.longTermGoals?.mid, long=data.longTermGoals?.long;
+  const mid=data.longTermGoals?.mid,long=data.longTermGoals?.long;
   $("longGoals").innerHTML=`<div class="goal"><div class="goal-head"><span>2028 中期目標</span><span class="good">${pct(mid,2)}</span></div><div class="bar"><span class="red" style="width:${Math.min(Math.max((mid||0)*100,0),100)}%"></span></div></div><div class="goal"><div class="goal-head"><span>2033 長期目標</span><span class="good">${pct(long,2)}</span></div><div class="bar"><span class="blue" style="width:${Math.min(Math.max((long||0)*100,0),100)}%"></span></div></div>`;
-  const ms=data.monthlyStats||[];$("monthlyTable").innerHTML=`<tr><th>月份</th><th>月結餘</th><th>月成長率</th><th>年度成長率</th></tr>`+ms.map(x=>`<tr><td>${x.month}</td><td>${money(x.balance)}</td><td class="${Number(x.monthlyGrowth)>=0?'good':'bad'}">${pct(x.monthlyGrowth,2)}</td><td>${pct(x.annualGrowth,2)}</td></tr>`).join("");
+  const ms=data.monthlyStats||[];
+  $("monthlyTable").innerHTML=`<tr><th>月份</th><th>月結餘</th><th>月成長率</th><th>年度成長率</th></tr>`+ms.map(x=>`<tr><td>${x.month}</td><td>${money(x.balance)}</td><td class="${Number(x.monthlyGrowth)>=0?'good':'bad'}">${pct(x.monthlyGrowth,2)}</td><td>${pct(x.annualGrowth,2)}</td></tr>`).join("");
 }
 async function loadDashboard(){
-  if(!API_URL)throw new Error("尚未設定 Apps Script API URL");
   const r=await fetch(API_URL+"?action=dashboard",{method:"GET",cache:"no-store",redirect:"follow"});
   if(!r.ok)throw new Error("資料服務回應錯誤（HTTP "+r.status+"）");
-  const result=await r.json();if(!result.ok)throw new Error(result.message||result.error||"無法取得資產資料");render(result.data);
+  const result=await r.json();
+  if(!result.ok)throw new Error(result.message||result.error||"無法取得資產資料");
+  render(result.data);
 }
-function load(){loadDashboard().catch(err=>{$("lastUpdated").textContent=err.message||"資料讀取失敗";console.error(err)})}
+function load(){loadDashboard().catch(err=>{$("lastUpdated").textContent="資料讀取失敗："+(err.message||"");console.error(err)})}
 function showToast(t){$("toast").textContent=t;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1800)}
 function openInputModal(){$("inputDate").value=new Date().toISOString().slice(0,10);$("modalBackdrop").classList.add("show")}
 function closeInputModal(){$("modalBackdrop").classList.remove("show")}
-document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>{const nav=btn.dataset.nav;document.querySelectorAll(".nav-btn").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(nav==="input"){openInputModal();document.querySelector('[data-nav="home"]').classList.add("active");btn.classList.remove("active")}if(nav==="stats"){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));$("statsPage").classList.add("active")}else if(nav==="home"){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));$("homePage").classList.add("active")}}));
+document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>{const nav=btn.dataset.nav;document.querySelectorAll(".nav-btn").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(nav==="input"){openInputModal();document.querySelector('[data-nav="home"]').classList.add("active");btn.classList.remove("active");return}document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));$(nav==="stats"?"statsPage":"homePage").classList.add("active")}));
 $("closeModal").addEventListener("click",closeInputModal);$("modalBackdrop").addEventListener("click",e=>{if(e.target===$("modalBackdrop"))closeInputModal()});$("refreshBtn").addEventListener("click",()=>{showToast("更新資料中…");load()});window.addEventListener("load",load);
 </script>
 </body></html>
