@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>資產總覽</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --bg: #f5f7fb;
@@ -15,19 +14,6 @@
   --accent: #315efb;
   --accent-soft: #edf2ff;
   --shadow: 0 8px 28px rgba(22, 34, 51, .08);
-}
-.login-card {
-  background:var(--card); border:1px solid var(--line); border-radius:18px;
-  padding:28px 22px; box-shadow:var(--shadow); text-align:center;
-  max-width:430px; margin:60px auto 0;
-}
-.login-card h2 { margin:0 0 8px; font-size:20px; }
-.login-card p { margin:0 0 20px; color:var(--muted); font-size:13px; line-height:1.6; }
-.login-error { color:#c43d3d; font-size:13px; margin-top:14px; line-height:1.5; }
-.account-badge { font-size:12px; color:var(--muted); margin-top:4px; }
-.logout-btn {
-  border:1px solid var(--line); background:#fff; color:var(--muted);
-  border-radius:9px; padding:6px 10px; font-size:12px; display:none;
 }
 
 * { box-sizing: border-box; }
@@ -197,22 +183,10 @@ button { cursor:pointer; }
 <div class="app">
   <div class="topbar">
     <h1>資產總覽</h1>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div id="status" class="status">尚未登入</div>
-      <button id="logoutBtn" class="logout-btn">登出</button>
-    </div>
+    <div id="status" class="status">資料載入中…</div>
   </div>
 
-  <main id="loginView" style="display:block;">
-    <section class="login-card">
-      <h2>登入資產總覽</h2>
-      <p>請使用已授權的 Google 帳戶登入。<br>未通過帳戶驗證時，不會讀取資產資料。</p>
-      <div id="googleSignIn"></div>
-      <div id="loginError" class="login-error"></div>
-    </section>
-  </main>
-
-  <main id="home" style="display:none;">
+  <main id="home">
     <div class="grid">
       <section class="card">
         <h2>總資產</h2>
@@ -276,7 +250,6 @@ button { cursor:pointer; }
  * 部署 Apps Script 網路應用程式後，把 URL 貼到這裡。
  */
 const API_URL = "https://script.google.com/macros/s/AKfycbyl6tzaf7O1lNhfuOVEH7zJPrdg5LhAUj42y_gdzczqST9xxCZJHSXrjyVilHnwo2LYNQ/exec";
-const GOOGLE_CLIENT_ID = "78134022886-h5m9h236o6aspqlvrbenj1lamo4ee9rd.apps.googleusercontent.com";
 
 const $ = (id) => document.getElementById(id);
 
@@ -364,180 +337,36 @@ function escapeHtml(s) {
   }[c]));
 }
 
-async function loadDashboard(credential) {
+async function loadDashboard() {
   if (!API_URL || API_URL.includes("請貼上")) {
     throw new Error("尚未設定 Apps Script API URL");
   }
 
-  if (!credential) {
-    throw new Error("缺少 Google 登入憑證");
-  }
-
-  /*
-   * 不使用 fetch：Google Apps Script Web App 的跨來源回應
-   * 可能無法讓 GitHub Pages 直接讀取 CORS 回應。
-   *
-   * 改用「隱藏 iframe + POST form + postMessage」：
-   * 1. 表單把 credential POST 給 Apps Script。
-   * 2. Apps Script 驗證成功後回傳一個極小的 HtmlService 頁面。
-   * 3. 該頁面透過 postMessage 把結果傳回本頁。
-   */
-  const frame = document.createElement("iframe");
-  const nonce = (
-    window.crypto && window.crypto.randomUUID
-      ? window.crypto.randomUUID()
-      : String(Date.now()) + "_" + Math.random().toString(36).slice(2)
-  );
-
-  frame.name = "asset_api_bridge_" + nonce.replace(/[^a-zA-Z0-9_-]/g, "");
-  frame.style.display = "none";
-  frame.setAttribute("aria-hidden", "true");
-  document.body.appendChild(frame);
-
-  let settled = false;
-  let timer = null;
-
-  const cleanup = () => {
-    window.removeEventListener("message", onMessage);
-    if (timer) clearTimeout(timer);
-    setTimeout(() => frame.remove(), 0);
-  };
-
-  const promise = new Promise((resolve, reject) => {
-    timer = setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      reject(new Error("Apps Script 沒有回傳驗證結果。請確認 Web App 已重新部署最新版本。"));
-    }, 20000);
-
-    function onMessage(event) {
-      const message = event.data;
-
-      // 不再只依賴 event.source。Apps Script HtmlService
-      // 可能經過額外的 iframe / redirect 層，導致 source
-      // 不一定等於最外層建立的 frame.contentWindow。
-      // 安全性改由：
-      // 1. 固定的訊息來源標記
-      // 2. 每次請求隨機 nonce
-      // 3. 只接受 Google Apps Script 的來源
-      if (!message || message.source !== "asset-overview-api") return;
-      if (message.nonce !== nonce) return;
-
-      const allowedOrigins = new Set([
-        "https://script.google.com",
-        "https://script.googleusercontent.com"
-      ]);
-
-      if (!allowedOrigins.has(event.origin)) return;
-
-      if (settled) return;
-      settled = true;
-      cleanup();
-
-      if (!message.ok) {
-        reject(new Error(message.message || message.error || "API error"));
-        return;
-      }
-
-      resolve(message);
-    }
-
-    window.addEventListener("message", onMessage);
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = API_URL;
-    form.target = frame.name;
-    form.style.display = "none";
-
-    const addField = (name, value) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = name;
-      input.value = value;
-      form.appendChild(input);
-    };
-
-    addField("action", "dashboard");
-    addField("credential", credential);
-    addField("nonce", nonce);
-
-    document.body.appendChild(form);
-    form.submit();
-    form.remove();
+  const response = await fetch(API_URL + "?action=dashboard", {
+    method: "GET",
+    cache: "no-store",
+    redirect: "follow"
   });
 
-  const message = await promise;
+  if (!response.ok) {
+    throw new Error("資料服務回應錯誤（HTTP " + response.status + "）");
+  }
 
-  render(message.data);
-  $("loginView").style.display = "none";
-  $("home").style.display = "block";
-  $("logoutBtn").style.display = "inline-block";
-  $("status").textContent = message.user && message.user.email
-    ? "已登入 · " + message.user.email
-    : "資料已更新";
+  const result = await response.json();
+
+  if (!result.ok) {
+    throw new Error(result.message || result.error || "無法取得資產資料");
+  }
+
+  render(result.data);
+  $("status").textContent = "資料已更新";
   $("status").classList.remove("error");
 }
 
-function showLoginError(message) {
-  $("loginError").textContent = message || "登入失敗，請稍後再試。";
-  $("status").textContent = "登入失敗";
+function showLoadError(message) {
+  $("status").textContent = message || "資料讀取失敗";
   $("status").classList.add("error");
-}
-
-function handleGoogleCredential(response) {
-  $("loginError").textContent = "";
-  $("status").textContent = "驗證中…";
-  $("status").classList.remove("error");
-
-  loadDashboard(response.credential).catch(err => {
-    console.error(err);
-    showLoginError(err && err.message ? err.message : "無法取得資產資料。");
-    $("loginView").style.display = "block";
-    $("home").style.display = "none";
-    $("logoutBtn").style.display = "none";
-  });
-}
-
-function initGoogleLogin() {
-  if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes("請貼上")) {
-    showLoginError("尚未設定 Google OAuth Client ID。");
-    return;
-  }
-
-  if (!window.google || !google.accounts || !google.accounts.id) {
-    showLoginError("Google 登入元件尚未載入，請重新整理頁面。");
-    return;
-  }
-
-  google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleGoogleCredential,
-    ux_mode: "popup",
-    auto_select: false
-  });
-
-  google.accounts.id.renderButton(
-    $("googleSignIn"),
-    {
-      type: "standard",
-      theme: "outline",
-      size: "large",
-      text: "signin_with",
-      shape: "rectangular",
-      width: 300
-    }
-  );
-}
-
-function logout() {
-  google.accounts.id.disableAutoSelect();
-  $("home").style.display = "none";
-  $("loginView").style.display = "block";
-  $("logoutBtn").style.display = "none";
-  $("status").textContent = "已登出";
-  $("status").classList.remove("error");
+  $("home").style.display = "block";
 }
 
 function openInputModal() {
@@ -573,10 +402,11 @@ $("modalBackdrop").addEventListener("click", e => {
   if (e.target === $("modalBackdrop")) closeInputModal();
 });
 
-$("logoutBtn").addEventListener("click", logout);
-
 window.addEventListener("load", () => {
-  initGoogleLogin();
+  loadDashboard().catch(err => {
+    console.error(err);
+    showLoadError(err && err.message ? err.message : "資料讀取失敗");
+  });
 });
 </script>
 </body>
