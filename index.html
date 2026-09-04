@@ -23,7 +23,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
 </head>
 <body>
 <main class="main">
-<header class="header"><div class="header-left"><div class="header-logo"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="3"></circle></svg></div><div><h1>資產總覽</h1><div class="subtitle">掌握資產，規劃更好的未來</div></div></div><div class="update"><span id="lastUpdated">資料載入中…</span> <button class="refresh" id="refreshBtn">⟳ 更新資料</button></div></header>
+<header class="header"><div class="header-left"><div class="header-logo"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="3"></circle></svg></div><div><h1>資產總覽</h1><div class="subtitle">掌握資產，規劃更好的未來</div></div></div><div class="update"><span id="lastUpdated">資料載入中…</span> <button class="refresh" id="refreshBtn"><svg class="icon-svg" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:4px" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.8-4L3 10"></path><path d="M3 5v5h5"></path><path d="M4 13a8 8 0 0 0 14.8 4L21 14"></path><path d="M21 19v-5h-5"></path></svg>更新資料</button></div></header>
 
 <section id="homePage" class="page active">
   <div class="cards">
@@ -53,98 +53,511 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbyl6tzaf7O1lNhfuOVEH7zJPrdg5LhAUj42y_gdzczqST9xxCZJHSXrjyVilHnwo2LYNQ/exec";
+const EXPECTED_API_VERSION="V2.1-GOAL-FIX";
+
 const $=id=>document.getElementById(id);
-function money(n){if(n==null||!Number.isFinite(Number(n)))return"—";return"NT$"+Number(n).toLocaleString("zh-TW",{maximumFractionDigits:0})}
-function pct(n,d=1){if(n==null||!Number.isFinite(Number(n)))return"—";return(Number(n)*100).toFixed(d)+"%"}
-function dateText(s){if(!s)return"—";return String(s).replaceAll("-","/")}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+function money(n){
+  if(n==null||!Number.isFinite(Number(n)))return"—";
+  return"NT$"+Number(n).toLocaleString("zh-TW",{maximumFractionDigits:0});
+}
+
+function pct(n,d=1){
+  if(n==null||!Number.isFinite(Number(n)))return"—";
+  return(Number(n)*100).toFixed(d)+"%";
+}
+
+function dateText(s){
+  if(!s)return"—";
+  return String(s).replaceAll("-","/");
+}
+
+function esc(s){
+  return String(s??"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
 function render(data){
-  $("totalAsset").textContent=money(data.totalAsset);
-  const tg=data.totalGrowthRate;
-  $("totalGrowth").textContent=tg!=null?((tg>=0?"▲ ":"▼ ")+pct(Math.abs(tg),2)):"—";
-  $("totalGrowth").className="growth"+(tg!=null&&tg<0?" negative":"");
-  $("initialSince").textContent=data.initialDate?`(自 ${dateText(data.initialDate)} 起)`:"—";
+  const kpi=data?.kpi||{};
+  const meta=data?.meta||{};
 
-  $("highAmount").textContent=money(data.historicalHigh?.amount);
-  $("highDate").textContent=dateText(data.historicalHigh?.date);
+  $("totalAsset").textContent=money(kpi.totalAsset);
 
-  const m=data.monthlyChange;
-  if(m){
+  const tg=meta.totalGrowthRate;
+  $("totalGrowth").textContent=
+    tg!=null
+      ? ((tg>=0?"▲ ":"▼ ")+pct(Math.abs(tg),2))
+      : "—";
+  $("totalGrowth").className=
+    "growth"+(tg!=null&&tg<0?" negative":"");
+
+  $("initialSince").textContent=
+    meta.initialDate
+      ? `(自 ${dateText(meta.initialDate)} 起)`
+      : "—";
+
+  $("highAmount").textContent=
+    money(kpi.historicalHigh?.amount);
+
+  $("highDate").textContent=
+    dateText(kpi.historicalHigh?.date);
+
+  const m=kpi.monthlyChange;
+
+  if(m && m.rate!=null && m.amount!=null){
     const positive=Number(m.rate)>=0;
-    $("monthlyRate").textContent=(positive?"▲ ":"▼ ")+pct(Math.abs(m.rate),2);
-    $("monthlyRate").className="kpi-value growth"+(positive?"":" negative");
-    $("monthlyAmount").textContent=(positive?"+ ":"- ")+money(Math.abs(m.amount ?? m.changeAmount));
-    $("monthlyAmount").className="growth"+(positive?"":" negative");
-    $("monthlyRange").textContent=`(${dateText(m.previousDate)} → ${dateText(m.latestDate)})`;
+
+    $("monthlyRate").textContent=
+      (positive?"▲ ":"▼ ")+pct(Math.abs(m.rate),2);
+
+    $("monthlyRate").className=
+      "kpi-value growth"+(positive?"":" negative");
+
+    $("monthlyAmount").textContent=
+      (positive?"+":"-")+" "+money(Math.abs(m.amount));
+
+    $("monthlyAmount").className=
+      "growth"+(positive?"":" negative");
+
+    $("monthlyRange").textContent=
+      `(${dateText(m.fromDate)} → ${dateText(m.toDate)})`;
   }else{
-    $("monthlyRate").textContent="—";$("monthlyAmount").textContent="—";$("monthlyRange").textContent="—";
+    $("monthlyRate").textContent="—";
+    $("monthlyAmount").textContent="—";
+    $("monthlyRange").textContent="—";
   }
 
-  renderAllocation(data.allocation||{});
-  renderTrend(data.history||[]);
-  renderGoals(data.goalProgress||[]);
+  renderAllocation(data.allocation||[]);
+  renderTrend(data.assetTrend||[]);
+  renderGoals(data.goals||[]);
   renderStats(data);
-  $("lastUpdated").textContent=data.latestDate?`最後更新：${dateText(data.latestDate)}`:"資料已更新";
+
+  $("lastUpdated").textContent=
+    meta.latestDate
+      ? `最後更新：${dateText(meta.latestDate)}`
+      : "資料已更新";
 }
-function renderAllocation(a){
-  const p1=Number(a.stock?.percentage)*100;
-  const p2=p1+Number(a.savings?.percentage)*100;
-  const p3=p2+Number(a.cash?.percentage)*100;
+
+function renderAllocation(list){
+  const items=Array.isArray(list)?list:[];
+
+  const stock=items.find(x=>x.key==="stock")||{};
+  const savings=items.find(x=>x.key==="savings")||{};
+  const cash=items.find(x=>x.key==="cash")||{};
+
+  const p1=Number(stock.percentage)*100;
+  const p2=p1+Number(savings.percentage)*100;
+  const p3=p2+Number(cash.percentage)*100;
+
   const ok=[p1,p2,p3].every(Number.isFinite);
-  const end1=ok?p1:0,end2=ok?p2:0,end3=ok?p3:0;
-  const donutBg=ok?`conic-gradient(var(--gold) 0 ${end1}%,var(--red) ${end1}% ${end2}%,var(--blue) ${end2}% ${end3}%)`:"#e7edf2";
-  $("allocation").innerHTML=`<div class="donut" style="background:${donutBg}"></div><div class="legend">${legendRow(a.stock?.label||"股票",a.stock?.percentage,"gold-text")}${legendRow(a.savings?.label||"員工儲蓄會",a.savings?.percentage,"red-text")}${legendRow(a.cash?.label||"緊急備用金",a.cash?.percentage,"blue-text")}</div>`;
+
+  const end1=ok?p1:0;
+  const end2=ok?p2:0;
+  const end3=ok?p3:0;
+
+  const donutBg=ok
+    ? `conic-gradient(
+        var(--gold) 0 ${end1}%,
+        var(--red) ${end1}% ${end2}%,
+        var(--blue) ${end2}% ${end3}%
+      )`
+    : "#e7edf2";
+
+  $("allocation").innerHTML=`
+    <div class="donut" style="background:${donutBg}"></div>
+    <div class="legend">
+      ${legendRow(stock.label||"股票",stock.percentage,"gold-text")}
+      ${legendRow(savings.label||"員工儲蓄會",savings.percentage,"red-text")}
+      ${legendRow(cash.label||"緊急備用金",cash.percentage,"blue-text")}
+    </div>`;
 }
-function legendRow(label,ratio,cls){return `<div class="legend-row"><i class="dot ${cls}" style="background:currentColor"></i><span>${esc(label)}</span><span class="pct ${cls}">${pct(ratio,0)}</span></div>`}
+
+function legendRow(label,ratio,cls){
+  return `
+    <div class="legend-row">
+      <i class="dot ${cls}" style="background:currentColor"></i>
+      <span>${esc(label)}</span>
+      <span class="pct ${cls}">${pct(ratio,0)}</span>
+    </div>`;
+}
+
 function renderTrend(history){
-  const pts=(history||[]).filter(x=>x.date&&x.asset!=null);
+  const pts=(history||[])
+    .filter(x=>x&&x.date&&x.amount!=null);
+
   const detail=$("trendDetail");
-  if(!pts.length){$("trend").innerHTML=`<div class="empty">目前沒有歷史資產資料</div>`;detail.classList.remove("show");return;}
-  const w=500,h=220,left=55,right=10,top=15,bottom=15,iw=w-left-right,ih=h-top-bottom;
-  const vals=pts.map(x=>Number(x.asset));
-  let min=Math.min(...vals),max=Math.max(...vals);
-  const pad=Math.max((max-min)*0.08,100000);min=Math.max(0,min-pad);max=max+pad;
+
+  if(!pts.length){
+    $("trend").innerHTML=
+      `<div class="empty">目前沒有歷史資產資料</div>`;
+    detail.classList.remove("show");
+    return;
+  }
+
+  const w=500,h=220;
+  const left=55,right=10,top=15,bottom=15;
+  const iw=w-left-right,ih=h-top-bottom;
+
+  const vals=pts.map(x=>Number(x.amount));
+
+  let min=Math.min(...vals);
+  let max=Math.max(...vals);
+
+  const pad=Math.max((max-min)*0.08,100000);
+
+  min=Math.max(0,min-pad);
+  max=max+pad;
+
   const span=max-min||1;
+
   const y=v=>top+(max-v)/span*ih;
-  const x=i=>left+(pts.length===1?iw/2:i/(pts.length-1)*iw);
-  const line=pts.map((p,i)=>`${x(i).toFixed(1)},${y(Number(p.asset)).toFixed(1)}`).join(" ");
-  const grid=[0,.2,.4,.6,.8,1].map(t=>{const yy=top+t*ih;return `<line class="chart-grid" x1="${left}" y1="${yy}" x2="${w-right}" y2="${yy}"/>`}).join("");
-  const years=[];pts.forEach((p,i)=>{const yr=String(p.date).slice(0,4);if(!years.some(g=>g.year===yr))years.push({year:yr,i})});
-  const labels=years.map(g=>`<text class="chart-label" x="${Math.max(0,Math.min(w-38,x(g.i)-12))}" y="${h-1}">${g.year}</text>`).join("");
-  const hits=pts.map((p,i)=>`<circle class="chart-hit" data-index="${i}" cx="${x(i)}" cy="${y(Number(p.asset))}" r="${pts.length>180?5:4}"/>`).join("");
-  $("trend").innerHTML=`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${grid}<polyline class="chart-line" points="${line}"/>${hits}${labels}</svg><div class="chart-tooltip" id="trendTooltip"></div>`;
+  const x=i=>
+    left+
+    (pts.length===1
+      ? iw/2
+      : i/(pts.length-1)*iw);
+
+  const line=pts
+    .map((p,i)=>
+      `${x(i).toFixed(1)},${y(Number(p.amount)).toFixed(1)}`
+    )
+    .join(" ");
+
+  const grid=[0,.2,.4,.6,.8,1]
+    .map(t=>{
+      const yy=top+t*ih;
+      return `<line class="chart-grid"
+        x1="${left}" y1="${yy}"
+        x2="${w-right}" y2="${yy}"/>`;
+    })
+    .join("");
+
+  const years=[];
+
+  pts.forEach((p,i)=>{
+    const yr=String(p.date).slice(0,4);
+    if(!years.some(g=>g.year===yr)){
+      years.push({year:yr,i});
+    }
+  });
+
+  const labels=years
+    .map(g=>
+      `<text class="chart-label"
+        x="${Math.max(0,Math.min(w-38,x(g.i)-12))}"
+        y="${h-1}">${g.year}</text>`
+    )
+    .join("");
+
+  const hits=pts
+    .map((p,i)=>
+      `<circle
+        class="chart-hit"
+        data-index="${i}"
+        cx="${x(i)}"
+        cy="${y(Number(p.amount))}"
+        r="${pts.length>180?5:4}"/>`
+    )
+    .join("");
+
+  $("trend").innerHTML=`
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      ${grid}
+      <polyline class="chart-line" points="${line}"/>
+      ${hits}
+      ${labels}
+    </svg>
+    <div class="chart-tooltip" id="trendTooltip"></div>`;
+
   const tooltip=$("trendTooltip");
-  const show=(i,pin=false)=>{const p=pts[i];tooltip.innerHTML=`${dateText(p.date)}<br><strong>${money(p.asset)}</strong>`;tooltip.style.display="block";const tx=x(i)/w*100;const ty=y(Number(p.asset))/h*100;tooltip.style.left=`${Math.min(78,Math.max(2,tx))}%`;tooltip.style.top=`${Math.max(2,ty-3)}%`;if(pin){detail.innerHTML=`${dateText(p.date)}　${money(p.asset)}`;detail.classList.add("show");}};
-  const hide=()=>{tooltip.style.display="none"};
-  document.querySelectorAll("#trend .chart-hit").forEach(el=>{const i=Number(el.dataset.index);el.addEventListener("mouseenter",()=>show(i,false));el.addEventListener("mouseleave",hide);el.addEventListener("click",()=>show(i,true));});
+
+  const show=(i,pin=false)=>{
+    const p=pts[i];
+
+    tooltip.innerHTML=
+      `${dateText(p.date)}<br><strong>${money(p.amount)}</strong>`;
+
+    tooltip.style.display="block";
+
+    const tx=x(i)/w*100;
+    const ty=y(Number(p.amount))/h*100;
+
+    tooltip.style.left=
+      `${Math.min(78,Math.max(2,tx))}%`;
+
+    tooltip.style.top=
+      `${Math.max(2,ty-3)}%`;
+
+    if(pin){
+      detail.innerHTML=
+        `${dateText(p.date)}　${money(p.amount)}`;
+      detail.classList.add("show");
+    }
+  };
+
+  const hide=()=>{
+    tooltip.style.display="none";
+  };
+
+  document
+    .querySelectorAll("#trend .chart-hit")
+    .forEach(el=>{
+      const i=Number(el.dataset.index);
+
+      el.addEventListener(
+        "mouseenter",
+        ()=>show(i,false)
+      );
+
+      el.addEventListener(
+        "mouseleave",
+        hide
+      );
+
+      el.addEventListener(
+        "click",
+        ()=>show(i,true)
+      );
+    });
+
   detail.classList.remove("show");
 }
-function moneyShort(v){if(v>=1000000)return"NT$"+(v/1000000).toFixed(1)+"M";if(v>=1000)return"NT$"+Math.round(v/1000)+"K";return money(v)}
+
 function renderGoals(goals){
-  $("goals").innerHTML=(goals||[]).map((g,i)=>{
-    const rate=Number.isFinite(Number(g.achievementRate))?Number(g.achievementRate):null;const width=rate==null?0:Math.min(Math.max(rate*100,0),100);const cls=i===0?"gold":i===1?"red":"blue";
-    return `<div class="goal"><div class="goal-head"><span>${esc(g.label)}</span><span class="goal-right"><b class="${rate!=null&&rate>=1?"good":""}">${pct(rate,1)}</b><span>${money(g.current)} / ${money(g.target)}</span></span></div><div class="bar"><span class="${cls}" style="width:${width}%"></span></div></div>`
-  }).join("");
+  const list=Array.isArray(goals)?goals:[];
+
+  $("goals").innerHTML=list
+    .map((g,i)=>{
+      const rate=
+        Number.isFinite(Number(g.achievementRate))
+          ? Number(g.achievementRate)
+          : null;
+
+      const width=
+        rate==null
+          ? 0
+          : Math.min(Math.max(rate*100,0),100);
+
+      const cls=
+        i===0
+          ?"gold"
+          :i===1
+            ?"red"
+            :"blue";
+
+      return `
+        <div class="goal">
+          <div class="goal-head">
+            <span>${esc(g.label)}</span>
+            <span class="goal-right">
+              <b class="${rate!=null&&rate>=1?"good":""}">
+                ${pct(rate,1)}
+              </b>
+              <span>
+                ${money(g.current)} / ${money(g.target)}
+              </span>
+            </span>
+          </div>
+          <div class="bar">
+            <span class="${cls}" style="width:${width}%"></span>
+          </div>
+        </div>`;
+    })
+    .join("");
 }
+
 function renderStats(data){
-  $("initialStats").innerHTML=`<div class="stat-box"><div class="stat-label">初始日期</div><div class="stat-value">${dateText(data.initialDate)}</div></div><div class="stat-box"><div class="stat-label">初始資產</div><div class="stat-value">${money(data.initialAsset)}</div></div><div class="stat-box"><div class="stat-label">總成長率</div><div class="stat-value good">${pct(data.totalGrowthRate,2)}</div></div>`;
-  const mid=data.longTermGoals?.mid,long=data.longTermGoals?.long;
-  $("longGoals").innerHTML=`<div class="goal"><div class="goal-head"><span>2028 中期目標</span><span class="good">${pct(mid,2)}</span></div><div class="bar"><span class="red" style="width:${Math.min(Math.max((mid||0)*100,0),100)}%"></span></div></div><div class="goal"><div class="goal-head"><span>2033 長期目標</span><span class="good">${pct(long,2)}</span></div><div class="bar"><span class="blue" style="width:${Math.min(Math.max((long||0)*100,0),100)}%"></span></div></div>`;
-  const ms=data.monthlyStats||[];
-  $("monthlyTable").innerHTML=`<tr><th>月份</th><th>月結餘</th><th>月成長率</th><th>年度成長率</th></tr>`+ms.map(x=>`<tr><td>${x.month}</td><td>${money(x.balance)}</td><td class="${Number(x.monthlyGrowth)>=0?'good':'bad'}">${pct(x.monthlyGrowth,2)}</td><td>${pct(x.annualGrowth,2)}</td></tr>`).join("");
+  const meta=data?.meta||{};
+
+  $("initialStats").innerHTML=`
+    <div class="stat-box">
+      <div class="stat-label">初始日期</div>
+      <div class="stat-value">${dateText(meta.initialDate)}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">初始資產</div>
+      <div class="stat-value">${money(meta.initialAsset)}</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">總成長率</div>
+      <div class="stat-value good">${pct(meta.totalGrowthRate,2)}</div>
+    </div>`;
+
+  const annual=data?.annualStats||[];
+
+  $("longGoals").innerHTML=
+    annual.length
+      ? `
+        <div class="table-scroll">
+          <table>
+            <tr>
+              <th>年度</th>
+              <th>年度總資產</th>
+              <th>年度成長率</th>
+            </tr>
+            ${annual.map(x=>`
+              <tr>
+                <td>${x.year}</td>
+                <td>${money(x.amount)}</td>
+                <td class="${Number(x.growth)>=0?'good':'bad'}">
+                  ${pct(x.growth,2)}
+                </td>
+              </tr>
+            `).join("")}
+          </table>
+        </div>`
+      : `<div class="empty">目前沒有年度統計資料</div>`;
+
+  const ms=data?.monthlyStats||[];
+
+  $("monthlyTable").innerHTML=`
+    <tr>
+      <th>月份</th>
+      <th>月結餘</th>
+      <th>月成長率</th>
+      <th>年度成長率</th>
+    </tr>
+    ${ms.map(x=>`
+      <tr>
+        <td>${x.month}</td>
+        <td>${money(x.amount)}</td>
+        <td class="${Number(x.growth)>=0?'good':'bad'}">
+          ${pct(x.growth,2)}
+        </td>
+        <td>${pct(x.annualGrowth,2)}</td>
+      </tr>
+    `).join("")}`;
 }
+
 async function loadDashboard(){
-  const r=await fetch(API_URL+"?action=dashboard",{method:"GET",cache:"no-store",redirect:"follow"});
-  if(!r.ok)throw new Error("資料服務回應錯誤（HTTP "+r.status+"）");
+  const r=await fetch(
+    API_URL+"?action=dashboard",
+    {
+      method:"GET",
+      cache:"no-store",
+      redirect:"follow"
+    }
+  );
+
+  if(!r.ok){
+    throw new Error(
+      "資料服務回應錯誤（HTTP "+r.status+"）"
+    );
+  }
+
   const result=await r.json();
-  if(!result.ok)throw new Error(result.message||result.error||"無法取得資產資料");
+
+  if(!result.ok){
+    throw new Error(
+      result.message||
+      result.error||
+      "無法取得資產資料"
+    );
+  }
+
+  if(result.apiVersion!==EXPECTED_API_VERSION){
+    throw new Error(
+      "API 版本不符：目前為 "+
+      (result.apiVersion||"未知")+
+      "，預期為 "+
+      EXPECTED_API_VERSION
+    );
+  }
+
+  if(!result.data){
+    throw new Error("API 沒有回傳 data。");
+  }
+
   render(result.data);
 }
-function load(){loadDashboard().catch(err=>{$("lastUpdated").textContent="資料讀取失敗："+(err.message||"");console.error(err)})}
-function showToast(t){$("toast").textContent=t;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1800)}
-function openInputModal(){$("inputDate").value=new Date().toISOString().slice(0,10);$("modalBackdrop").classList.add("show")}
-function closeInputModal(){$("modalBackdrop").classList.remove("show")}
-document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>{const nav=btn.dataset.nav;document.querySelectorAll(".nav-btn").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(nav==="input"){openInputModal();document.querySelector('[data-nav="home"]').classList.add("active");btn.classList.remove("active");return}document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));$(nav==="stats"?"statsPage":"homePage").classList.add("active")}));
-$("closeModal").addEventListener("click",closeInputModal);$("modalBackdrop").addEventListener("click",e=>{if(e.target===$("modalBackdrop"))closeInputModal()});$("refreshBtn").addEventListener("click",()=>{showToast("更新資料中…");load()});window.addEventListener("load",load);
+
+function load(){
+  loadDashboard().catch(err=>{
+    $("lastUpdated").textContent=
+      "資料讀取失敗："+(err.message||"");
+
+    console.error(err);
+  });
+}
+
+function showToast(t){
+  $("toast").textContent=t;
+  $("toast").classList.add("show");
+  setTimeout(
+    ()=>$("toast").classList.remove("show"),
+    1800
+  );
+}
+
+function openInputModal(){
+  $("inputDate").value=
+    new Date().toISOString().slice(0,10);
+
+  $("modalBackdrop").classList.add("show");
+}
+
+function closeInputModal(){
+  $("modalBackdrop").classList.remove("show");
+}
+
+document
+  .querySelectorAll(".nav-btn")
+  .forEach(btn=>
+    btn.addEventListener("click",()=>{
+      const nav=btn.dataset.nav;
+
+      document
+        .querySelectorAll(".nav-btn")
+        .forEach(x=>x.classList.remove("active"));
+
+      btn.classList.add("active");
+
+      if(nav==="input"){
+        openInputModal();
+
+        document
+          .querySelector('[data-nav="home"]')
+          .classList.add("active");
+
+        btn.classList.remove("active");
+        return;
+      }
+
+      document
+        .querySelectorAll(".page")
+        .forEach(p=>p.classList.remove("active"));
+
+      $(
+        nav==="stats"
+          ?"statsPage"
+          :"homePage"
+      ).classList.add("active");
+    })
+  );
+
+$("closeModal").addEventListener(
+  "click",
+  closeInputModal
+);
+
+$("modalBackdrop").addEventListener(
+  "click",
+  e=>{
+    if(e.target===$("modalBackdrop")){
+      closeInputModal();
+    }
+  }
+);
+
+$("refreshBtn").addEventListener(
+  "click",
+  ()=>{
+    showToast("更新資料中…");
+    load();
+  }
+);
+
+window.addEventListener("load",load);
 </script>
 </body></html>
