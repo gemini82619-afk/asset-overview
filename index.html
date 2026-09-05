@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<meta name="theme-color" content="#102846">
 <title>資產總覽</title>
 <style>
 *{box-sizing:border-box}
@@ -24,7 +29,8 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 8
   .legend-bottom{width:100%;display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap}
   .legend-bottom .legend-row{display:grid;grid-template-columns:10px auto auto;align-items:center;gap:7px;min-width:auto}
   .daily-table-scroll{max-height:390px;overflow:auto}
-  .stock-management-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .stock-management-row{display:flex;align-items:center;justify-content:flex-end;gap:16px}
+  .stock-management-row .outline-btn{white-space:nowrap}
   .outline-btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 13px;color:var(--text);cursor:pointer}
   .primary-btn{border:0;background:#173b61;color:#fff;border-radius:10px;padding:9px 16px;cursor:pointer;font-weight:800}
   .primary-btn:disabled,.outline-btn:disabled{opacity:.55;cursor:not-allowed}
@@ -207,7 +213,6 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 8
       <table id="stockTable"></table>
     </div>
     <div class="stock-management-row" style="margin-top:12px">
-      <div class="small">股票資料直接讀取 Google Sheets 既有計算結果。</div>
       <button id="openStockManagerBtn" class="outline-btn" type="button">股票管理</button>
     </div>
   </div>
