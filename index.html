@@ -230,7 +230,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 8
     <div class="modal-head"><h2 id="stockModalTitle">股票管理</h2><button id="closeStockModal" class="close" type="button">×</button></div>
     <div class="form">
       <div id="stockMenuView">
-        <div class="hint">股票資料管理範圍固定為 G8:H15；G16 以下其他資料不會被股票功能寫入。</div>
+        <div class="hint">既有股票可管理 G2:H15；新增股票只使用 G8:H15。G16 以下其他資料不會被股票功能寫入。</div>
         <div class="stock-menu-grid">
           <button class="primary-btn stock-menu-btn" type="button" data-stock-mode="add">新增</button>
           <button class="outline-btn stock-menu-btn" type="button" data-stock-mode="edit">修改</button>
@@ -255,7 +255,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 8
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbxMkJCUcpCUyiljb8CwAJgE32wMlaqcfP69yqlbTiDLseu6KtJmgD8FRpnTj8HLiqxAPg/exec";
-const EXPECTED_API_VERSION="V2.11-STOCK-MGMT";
+const EXPECTED_API_VERSION="V2.12-STOCK-RANGE";
 
 const $=id=>document.getElementById(id);
 
@@ -1024,7 +1024,7 @@ function showStockForm(mode){
   }
 
   $('stockFormHint').textContent=mode==='add'
-    ? '新增只使用 G8:H15 的第一個可用空白列；G16 以下不會寫入。單價與現值由試算表公式處理。'
+    ? '新增只使用 G8:H15 的第一個可用空白列；既有 G2:H7 可修改或刪除；G16 以下不會寫入。單價與現值由試算表公式處理。'
     : mode==='edit'
       ? '修改只更新所選股票的 H 欄持有股數；代號與 I/J 公式保留。'
       : '刪除只清除所選股票的 G/H；I/J 公式保留，之後可重新使用該列。';
