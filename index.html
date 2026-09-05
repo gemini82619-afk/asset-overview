@@ -264,6 +264,11 @@ function money(n){
   return"NT$"+Number(n).toLocaleString("zh-TW",{maximumFractionDigits:0});
 }
 
+function stockPrice(n){
+  if(n==null||!Number.isFinite(Number(n)))return"—";
+  return"NT$"+Number(n).toLocaleString("zh-TW",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
 function pct(n,d=1){
   if(n==null||!Number.isFinite(Number(n)))return"—";
   return(Number(n)*100).toFixed(d)+"%";
@@ -703,7 +708,7 @@ function renderStockAssets(list){
         <tr>
           <td>${esc(x.ticker)}</td>
           <td>${x.shares==null?"—":Number(x.shares).toLocaleString("zh-TW",{maximumFractionDigits:4})}</td>
-          <td>${money(x.price)}</td>
+          <td>${stockPrice(x.price)}</td>
           <td>${money(x.value)}</td>
         </tr>
       `).join("")
