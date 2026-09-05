@@ -14,7 +14,7 @@
 :root{--text:#182a43;--muted:#718096;--line:#d9e2ea;--bg:#eef4f8;--card:#fff;--green:#17946c;--red:#ef4444;--blue:#3182ce;--gold:#f2a900}
 html,body{margin:0;min-height:100%}
 body{font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:0}
-button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 82px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.header-left{display:flex;gap:12px;align-items:center}.header-logo{width:42px;height:42px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:0 2px 8px #b8c5cf55}.icon-svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.header-logo .icon-svg{width:24px;height:24px}.section-title .icon-svg{width:18px;height:18px}.kpi-title{display:flex;align-items:center;gap:7px}h1{margin:0;font-size:23px}.subtitle{color:var(--muted);font-size:13px;margin-top:3px}.update{color:#7a8794;font-size:12px}.refresh{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;margin-left:7px}
+button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 82px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.header-left{display:flex;gap:12px;align-items:center}.header-logo{width:42px;height:42px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:0 2px 8px #b8c5cf55}.icon-svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.header-logo .icon-svg{width:24px;height:24px}.section-title .icon-svg{width:18px;height:18px}.kpi-title{display:flex;align-items:center;gap:7px}h1{margin:0;font-size:23px}.subtitle{color:var(--muted);font-size:13px;margin-top:3px}.update{color:#7a8794;font-size:12px;display:flex;align-items:center;gap:0}.refresh{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;margin-left:7px}
 .page{display:none}.page.active{display:block}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.card{background:var(--card);border:1px solid #dbe5ec;border-radius:11px;padding:17px;box-shadow:0 2px 8px #9eb0bd22}.kpi{min-height:135px}.kpi:nth-child(1){background:linear-gradient(135deg,#effcf7,#fff)}.kpi:nth-child(2){background:linear-gradient(135deg,#fff6ee,#fff)}.kpi:nth-child(3){background:linear-gradient(135deg,#eff6ff,#fff)}.kpi-title{font-weight:800;font-size:17px}.kpi-value{font-size:27px;font-weight:900;margin:13px 0 7px}.growth{color:var(--green);font-size:17px;font-weight:800}.negative{color:var(--red)}.small{font-size:12px;color:var(--muted)}
 .grid-home{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:11px}.section-title{font-size:17px;font-weight:850;display:flex;align-items:center;gap:8px;margin-bottom:12px}.donut-wrap{display:flex;align-items:center;gap:18px;min-height:170px}.donut{width:170px;height:170px;border-radius:50%;background:#e7edf2;position:relative;flex:none}.donut:after{content:"";position:absolute;inset:45px;background:#fff;border-radius:50%}.legend{flex:1}.legend-row{display:grid;grid-template-columns:12px 1fr auto;gap:7px;align-items:center;margin:12px 0;font-size:13px}.dot{width:11px;height:11px;border-radius:50%}.gold-text{color:var(--gold)}.red-text{color:var(--red)}.blue-text{color:var(--blue)}.pct{font-weight:800}
 .chart{height:225px;position:relative}.chart svg{width:100%;height:100%;display:block;touch-action:none}.chart-hit{fill:transparent;stroke:transparent;cursor:pointer}.chart-hit:hover{fill:#df492f33}.chart-tooltip{position:absolute;display:none;pointer-events:none;background:#182a43;color:#fff;border-radius:8px;padding:7px 9px;font-size:12px;line-height:1.35;white-space:nowrap;box-shadow:0 5px 16px #182a4330;z-index:3}.chart-detail{display:none;margin-top:6px;text-align:center;font-size:12px;color:var(--muted)}.chart-detail.show{display:block}.chart-hint{text-align:center;color:var(--muted);font-size:12px;margin-top:2px}.chart-grid{stroke:#d9e2ea;stroke-width:1}.chart-line{fill:none;stroke:#df492f;stroke-width:3}.chart-point{fill:#df492f}.chart-label{font-size:11px;fill:#718096}.chart-value{font-size:10px;fill:#182a43;font-weight:700}
@@ -23,7 +23,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 8
 .bottom-nav{position:fixed;z-index:20;bottom:0;left:0;right:0;height:76px;background:rgba(255,255,255,.97);border-top:1px solid #d5e0e8;display:flex;justify-content:center;box-shadow:0 -3px 14px #65788822}.nav-inner{width:min(620px,100%);display:grid;grid-template-columns:repeat(3,1fr)}.nav-btn{border:0;background:none;color:#718096;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:700}.nav-btn .icon{font-size:23px;line-height:1}.nav-btn.active{color:#173b61}.nav-btn.active .icon{transform:translateY(-1px)}
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(15,31,48,.48);z-index:50;align-items:center;justify-content:center;padding:18px}.modal-backdrop.show{display:flex}.modal{width:min(500px,100%);background:#fff;border-radius:15px;box-shadow:0 20px 70px #0d213844;overflow:hidden}.modal-head{padding:17px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h2{margin:0;font-size:19px}.close{border:0;background:#eef3f6;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:20px;color:#536273}.form{padding:18px}.field{margin-bottom:14px}.field label{display:block;font-weight:800;font-size:13px;margin-bottom:6px}.field input{width:100%;padding:11px 12px;border:1px solid #ccd8e1;border-radius:8px;outline:none}.hint{font-size:12px;color:var(--muted);background:#f5f8fa;border-radius:8px;padding:9px;margin-bottom:15px}.toast{position:fixed;z-index:80;bottom:92px;left:50%;transform:translateX(-50%);background:#17324c;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;display:none}.toast.show{display:block}
 @media(max-width:1050px){.grid-home{grid-template-columns:1fr 1fr}.grid-home>.card:last-child{grid-column:1/-1}}
-@media(max-width:760px){.main{padding:13px 13px 82px}.header{align-items:flex-start}.update{display:none}.cards,.grid-home,.stats-grid{grid-template-columns:1fr}.grid-home>.card:last-child{grid-column:auto}.initial-card{grid-template-columns:1fr}.donut-wrap{flex-direction:column}.donut{width:155px;height:155px}.long-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.main{padding:13px 13px 82px}.header{align-items:center;flex-wrap:nowrap;gap:10px}.header-left{min-width:0;flex:1}.header-left>div:last-child{min-width:0}.header-left h1{white-space:nowrap}.update{width:auto;flex:none;display:flex;align-items:center;justify-content:flex-end}.update #lastUpdated{display:none}.refresh{margin-left:0;white-space:nowrap;padding:8px 11px}.cards,.grid-home,.stats-grid{grid-template-columns:1fr}.grid-home>.card:last-child{grid-column:auto}.initial-card{grid-template-columns:1fr}.donut-wrap{flex-direction:column}.donut{width:155px;height:155px}.long-grid{grid-template-columns:1fr}}
 
   .allocation-visual{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
   .legend-bottom{width:100%;display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap}
@@ -230,7 +230,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 8
     <div class="modal-head"><h2 id="stockModalTitle">股票管理</h2><button id="closeStockModal" class="close" type="button">×</button></div>
     <div class="form">
       <div id="stockMenuView">
-        <div class="hint">既有股票可管理 G2:H15；新增股票只使用 G8:H15。G16 以下其他資料不會被股票功能寫入。</div>
+        <div class="hint">股票資料管理範圍固定為 G8:H15；G16 以下其他資料不會被股票功能寫入。</div>
         <div class="stock-menu-grid">
           <button class="primary-btn stock-menu-btn" type="button" data-stock-mode="add">新增</button>
           <button class="outline-btn stock-menu-btn" type="button" data-stock-mode="edit">修改</button>
@@ -255,7 +255,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 8
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbxMkJCUcpCUyiljb8CwAJgE32wMlaqcfP69yqlbTiDLseu6KtJmgD8FRpnTj8HLiqxAPg/exec";
-const EXPECTED_API_VERSION="V2.12-STOCK-RANGE";
+const EXPECTED_API_VERSION="V2.11-STOCK-MGMT";
 
 const $=id=>document.getElementById(id);
 
@@ -339,10 +339,8 @@ function render(data){
   renderGoalSettings(data.goalSettings||[]);
   renderStockAssets(data.stockAssets||[]);
 
-  $("lastUpdated").textContent=
-    meta.latestDate
-      ? `最後更新：${dateText(meta.latestDate)}`
-      : "資料已更新";
+  // 「最後更新」代表本次成功從 Google Sheets 取得資料的時間，
+  // 不再使用最新資產日期代替更新時間。
 }
 
 function renderAllocation(list){
@@ -819,6 +817,12 @@ async function loadDashboard(){
   }
 
   render(result.data);
+
+  // 僅在資料成功取得並完成畫面更新後，記錄最近一次成功更新時間。
+  const updatedAt = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  $("lastUpdated").textContent =
+    `最後更新：${updatedAt.getFullYear()}/${pad(updatedAt.getMonth()+1)}/${pad(updatedAt.getDate())} ${pad(updatedAt.getHours())}:${pad(updatedAt.getMinutes())}`;
 }
 
 $("dailyRange").addEventListener(
@@ -1024,7 +1028,7 @@ function showStockForm(mode){
   }
 
   $('stockFormHint').textContent=mode==='add'
-    ? '新增只使用 G8:H15 的第一個可用空白列；既有 G2:H7 可修改或刪除；G16 以下不會寫入。單價與現值由試算表公式處理。'
+    ? '新增只使用 G8:H15 的第一個可用空白列；G16 以下不會寫入。單價與現值由試算表公式處理。'
     : mode==='edit'
       ? '修改只更新所選股票的 H 欄持有股數；代號與 I/J 公式保留。'
       : '刪除只清除所選股票的 G/H；I/J 公式保留，之後可重新使用該列。';
