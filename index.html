@@ -107,7 +107,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 8
   <div class="cards">
     <div class="card kpi"><div class="kpi-title"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 9h18"></path><circle cx="8" cy="14" r="1.5"></circle></svg>總資產</div><div id="totalAsset" class="kpi-value">—</div><div id="totalGrowth" class="growth">—</div><div id="initialSince" class="small">—</div></div>
     <div class="card kpi"><div class="kpi-title"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16"></path><path d="M5 18 4 8l4 3 4-6 4 6 4-3-1 10"></path></svg>歷史高點</div><div id="highAmount" class="kpi-value">—</div><div class="small">達成日期</div><div id="highDate" style="font-weight:800;margin-top:4px">—</div></div>
-    <div class="card kpi"><div class="kpi-title"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 10 12 14 15 21 7"></path><path d="M15 7h6v6"></path></svg>本月變化</div><div id="monthlyRate" class="kpi-value growth">—</div><div id="monthlyAmount" class="growth">—</div><div id="monthlyRange" class="small">—</div></div>
+    <div class="card kpi"><div class="kpi-title"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 10 12 14 15 21 7"></path><path d="M15 7h6v6"></path></svg>本月變化</div><div id="monthlyAmount" class="kpi-value growth">—</div><div id="monthlyRate" class="growth">—</div><div id="monthlyRange" class="small">—</div></div>
   </div>
 
   <div class="grid-home">
@@ -311,16 +311,16 @@ function render(data){
   if(m && m.rate!=null && m.amount!=null){
     const positive=Number(m.rate)>=0;
 
-    $("monthlyRate").textContent=
-      (positive?"▲ ":"▼ ")+pct(Math.abs(m.rate),2);
-
-    $("monthlyRate").className=
-      "kpi-value growth"+(positive?"":" negative");
-
     $("monthlyAmount").textContent=
       (positive?"+":"-")+" "+money(Math.abs(m.amount));
 
     $("monthlyAmount").className=
+      "kpi-value growth"+(positive?"":" negative");
+
+    $("monthlyRate").textContent=
+      (positive?"▲ ":"▼ ")+pct(Math.abs(m.rate),2);
+
+    $("monthlyRate").className=
       "growth"+(positive?"":" negative");
 
     $("monthlyRange").textContent=
