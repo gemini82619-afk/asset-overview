@@ -26,6 +26,11 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
   .daily-table-scroll{max-height:390px;overflow:auto}
   .stock-management-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
   .outline-btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 13px;color:var(--text);cursor:pointer}
+  .primary-btn{border:0;background:#173b61;color:#fff;border-radius:10px;padding:9px 16px;cursor:pointer;font-weight:800}
+  .primary-btn:disabled,.outline-btn:disabled{opacity:.55;cursor:not-allowed}
+  .modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:4px}
+  .edit-btn{border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 9px;color:var(--text);cursor:pointer;font-size:12px;font-weight:700}
+
 
   /* V2.3：統計頁第二列並列 */
   .stats-row-initial{grid-template-columns:minmax(0,1fr)}
@@ -67,7 +72,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
       grid-template-columns:1fr;
     }
   }
-  /* V2.9.4：目標設定 */
+  /* V2.10：目標設定 */
   .goal-setting-wrap{display:flex;flex-direction:column;gap:12px}
   .goal-setting-annual{overflow-x:auto}
   .goal-setting-annual table{width:100%;min-width:420px;table-layout:fixed}
@@ -206,7 +211,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
 
 <nav class="bottom-nav"><div class="nav-inner"><button class="nav-btn active" data-nav="home"><span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg></span><span>首頁</span></button><button class="nav-btn" data-nav="input"><span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span><span>輸入</span></button><button class="nav-btn" data-nav="stats"><span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11"></path><path d="M12 20V5"></path><path d="M19 20V8"></path></svg></span><span>統計</span></button></div></nav>
 
-<div id="modalBackdrop" class="modal-backdrop"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2>新增資產紀錄</h2><button id="closeModal" class="close">×</button></div><div class="form"><div class="field"><label>日期</label><input type="date" id="inputDate"></div><div class="field"><label>股票</label><input type="number" id="inputStock" min="0" step="0.01"></div><div class="field"><label>員工儲蓄會</label><input type="number" id="inputSavings" min="0" step="0.01"></div><div class="field"><label>現金</label><input type="number" id="inputCash" min="0" step="0.01"></div><div class="hint">目前為唯讀版；這個視窗先保留輸入介面，不會寫入 Google Sheets。</div></div></div></div>
+<div id="modalBackdrop" class="modal-backdrop"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2>新增資產紀錄</h2><button id="closeModal" class="close">×</button></div><div class="form"><div class="field"><label>日期</label><input type="date" id="inputDate"></div><div class="field"><label>股票</label><input type="number" id="inputStock" min="0" step="0.01"></div><div class="field"><label>員工儲蓄會</label><input type="number" id="inputSavings" min="0" step="0.01"></div><div class="field"><label>現金</label><input type="number" id="inputCash" min="0" step="0.01"></div><div class="hint" id="modalHint">新增資料會寫入 Google Sheets 的「資產」的副本，並沿用既有公式。</div><div class="modal-actions"><button id="cancelModal" class="outline-btn" type="button">取消</button><button id="saveAssetBtn" class="primary-btn" type="button">儲存</button></div></div></div></div>
 <div id="toast" class="toast"></div>
 
 <script>
@@ -574,7 +579,7 @@ function updateDailyStatsTable(){
           </td>
         </tr>
       `).join("")
-      : `<tr><td colspan="6" class="empty">目前沒有每日資產資料</td></tr>`
+      : `<tr><td colspan="7" class="empty">目前沒有每日資產資料</td></tr>`
     }`;
 }
 
@@ -765,15 +770,89 @@ function showToast(t){
   );
 }
 
-function openInputModal(){
+let editingRow=null;
+
+function openInputModal(record=null){
+  editingRow=record?.row??null;
+
   $("inputDate").value=
+    record?.date ||
     new Date().toISOString().slice(0,10);
 
+  $("inputStock").value=record?.stock??"";
+  $("inputSavings").value=record?.savings??"";
+  $("inputCash").value=record?.cash??"";
+
   $("modalBackdrop").classList.add("show");
+
+  $("modalBackdrop").querySelector(".modal-head h2").textContent=
+    editingRow===null ? "新增資產紀錄" : "修改資產紀錄";
+
+  $("saveAssetBtn").textContent=
+    editingRow===null ? "儲存" : "儲存修改";
+
+  $("modalHint").textContent=
+    editingRow===null
+      ? "新增資料會寫入 Google Sheets 的「資產」的副本，並沿用既有公式。"
+      : "修改只更新日期、股票、員工儲蓄會、現金；總資產與成長率公式會保留。";
 }
 
 function closeInputModal(){
   $("modalBackdrop").classList.remove("show");
+  editingRow=null;
+}
+
+async function saveAsset(){
+  const payload={
+    action: editingRow===null ? "addAsset" : "updateAsset",
+    row: editingRow,
+    date: $("inputDate").value,
+    stock: $("inputStock").value,
+    savings: $("inputSavings").value,
+    cash: $("inputCash").value
+  };
+
+  if(!payload.date || payload.stock==="" || payload.savings==="" || payload.cash===""){
+    showToast("請完整填寫資料");
+    return;
+  }
+
+  const btn=$("saveAssetBtn");
+  btn.disabled=true;
+  btn.textContent="儲存中…";
+
+  try{
+    const body=new URLSearchParams();
+    Object.entries(payload).forEach(([k,v])=>{
+      if(v!==null&&v!==undefined) body.append(k,String(v));
+    });
+
+    const response=await fetch(API_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
+      body:body.toString()
+    });
+
+    if(!response.ok){
+      throw new Error(`資料服務回應錯誤（HTTP ${response.status}）`);
+    }
+
+    const result=await response.json();
+
+    if(!result.ok){
+      throw new Error(result.error||"資料寫入失敗。");
+    }
+
+    closeInputModal();
+    showToast(editingRow===null?"新增成功":"修改成功");
+    await load();
+  }catch(err){
+    console.error(err);
+    showToast(err.message||"資料寫入失敗");
+  }finally{
+    btn.disabled=false;
+    btn.textContent=editingRow===null?"儲存":"儲存修改";
+  }
 }
 
 document
@@ -815,6 +894,31 @@ $("closeModal").addEventListener(
   "click",
   closeInputModal
 );
+$("saveAssetBtn").addEventListener(
+  "click",
+  saveAsset
+);
+
+$("cancelModal").addEventListener(
+  "click",
+  closeInputModal
+);
+
+$("dailyTable").addEventListener(
+  "click",
+  e=>{
+    const btn=e.target.closest("[data-edit-row]");
+    if(!btn)return;
+
+    const row=Number(btn.dataset.editRow);
+    const record=dailyStatsCache.find(x=>Number(x.row)===row);
+
+    if(record){
+      openInputModal(record);
+    }
+  }
+);
+
 
 $("modalBackdrop").addEventListener(
   "click",
