@@ -30,6 +30,11 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
   .primary-btn:disabled,.outline-btn:disabled{opacity:.55;cursor:not-allowed}
   .modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:4px}
   .edit-btn{border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 9px;color:var(--text);cursor:pointer;font-size:12px;font-weight:700}
+  .stock-menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .stock-menu-btn{min-height:48px;font-weight:800}
+  .stock-form select{width:100%}
+  select{width:100%;padding:11px 12px;border:1px solid #ccd8e1;border-radius:8px;background:#fff;color:var(--text)}
+  @media(max-width:520px){.stock-menu-grid{grid-template-columns:1fr}}
 
 
   /* V2.3：統計頁第二列並列 */
@@ -201,7 +206,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
     </div>
     <div class="stock-management-row" style="margin-top:12px">
       <div class="small">股票資料直接讀取 Google Sheets 既有計算結果。</div>
-      <button class="outline-btn" type="button">前往股票管理</button>
+      <button id="openStockManagerBtn" class="outline-btn" type="button">前往股票管理</button>
     </div>
   </div>
 
@@ -212,11 +217,38 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 4
 <nav class="bottom-nav"><div class="nav-inner"><button class="nav-btn active" data-nav="home"><span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg></span><span>首頁</span></button><button class="nav-btn" data-nav="input"><span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span><span>輸入</span></button><button class="nav-btn" data-nav="stats"><span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V11"></path><path d="M12 20V5"></path><path d="M19 20V8"></path></svg></span><span>統計</span></button></div></nav>
 
 <div id="modalBackdrop" class="modal-backdrop"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2>新增資產紀錄</h2><button id="closeModal" class="close">×</button></div><div class="form"><div class="field"><label>日期</label><input type="date" id="inputDate"></div><div class="field"><label>股票</label><input type="number" id="inputStock" min="0" step="0.01"></div><div class="field"><label>員工儲蓄會</label><input type="number" id="inputSavings" min="0" step="0.01"></div><div class="field"><label>現金</label><input type="number" id="inputCash" min="0" step="0.01"></div><div class="hint" id="modalHint">新增資料會寫入 Google Sheets 的「資產」的副本，並沿用既有公式。</div><div class="modal-actions"><button id="cancelModal" class="outline-btn" type="button">取消</button><button id="saveAssetBtn" class="primary-btn" type="button">儲存</button></div></div></div></div>
+
+<div id="stockModalBackdrop" class="modal-backdrop">
+  <div class="modal stock-modal" role="dialog" aria-modal="true">
+    <div class="modal-head"><h2 id="stockModalTitle">股票管理</h2><button id="closeStockModal" class="close" type="button">×</button></div>
+    <div class="form">
+      <div id="stockMenuView">
+        <div class="hint">股票資料管理範圍固定為 G8:H15；G16 以下其他資料不會被股票功能寫入。</div>
+        <div class="stock-menu-grid">
+          <button class="primary-btn stock-menu-btn" type="button" data-stock-mode="add">新增</button>
+          <button class="outline-btn stock-menu-btn" type="button" data-stock-mode="edit">修改</button>
+          <button class="outline-btn stock-menu-btn" type="button" data-stock-mode="delete">刪除</button>
+        </div>
+      </div>
+      <div id="stockFormView" style="display:none">
+        <div class="field" id="stockTickerField"><label>代號</label><input id="stockTickerInput" maxlength="12" autocomplete="off" placeholder="例如：0050"></div>
+        <div class="field" id="stockTickerSelectField" style="display:none"><label>代號</label><select id="stockTickerSelect"></select></div>
+        <div class="field"><label>持有股數</label><input id="stockSharesInput" type="number" min="0" step="0.0001"></div>
+        <div class="hint" id="stockFormHint"></div>
+        <div class="modal-actions">
+          <button id="stockBackBtn" class="outline-btn" type="button">返回</button>
+          <button id="stockSaveBtn" class="primary-btn" type="button">儲存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbxMkJCUcpCUyiljb8CwAJgE32wMlaqcfP69yqlbTiDLseu6KtJmgD8FRpnTj8HLiqxAPg/exec";
-const EXPECTED_API_VERSION="V2.6-GOALS-STOCKS";
+const EXPECTED_API_VERSION="V2.11-STOCK-MGMT";
 
 const $=id=>document.getElementById(id);
 
@@ -242,6 +274,7 @@ function esc(s){
 }
 
 function render(data){
+  window.currentDashboardData=data||{};
   const kpi=data?.kpi||{};
   const meta=data?.meta||{};
 
@@ -565,6 +598,7 @@ function updateDailyStatsTable(){
       <th>現金</th>
       <th>總資產</th>
       <th>成長率</th>
+      <th>操作</th>
     </tr>
     ${filtered.length
       ? filtered.map(x=>`
@@ -577,6 +611,7 @@ function updateDailyStatsTable(){
           <td class="${Number(x.growth)>=0?'good':'bad'}">
             ${pct(x.growth,2)}
           </td>
+          <td><button class="edit-btn" type="button" data-edit-row="${x.row}">修改</button></td>
         </tr>
       `).join("")
       : `<tr><td colspan="7" class="empty">目前沒有每日資產資料</td></tr>`
@@ -803,13 +838,14 @@ function closeInputModal(){
 }
 
 async function saveAsset(){
+  const isEditing=editingRow!==null;
   const payload={
-    action: editingRow===null ? "addAsset" : "updateAsset",
-    row: editingRow,
-    date: $("inputDate").value,
-    stock: $("inputStock").value,
-    savings: $("inputSavings").value,
-    cash: $("inputCash").value
+    action:isEditing ? "updateAsset" : "addAsset",
+    row:editingRow,
+    date:$('inputDate').value,
+    stock:$('inputStock').value,
+    savings:$('inputSavings').value,
+    cash:$('inputCash').value
   };
 
   if(!payload.date || payload.stock==="" || payload.savings==="" || payload.cash===""){
@@ -817,7 +853,7 @@ async function saveAsset(){
     return;
   }
 
-  const btn=$("saveAssetBtn");
+  const btn=$('saveAssetBtn');
   btn.disabled=true;
   btn.textContent="儲存中…";
 
@@ -826,32 +862,19 @@ async function saveAsset(){
     Object.entries(payload).forEach(([k,v])=>{
       if(v!==null&&v!==undefined) body.append(k,String(v));
     });
-
-    const response=await fetch(API_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
-      body:body.toString()
-    });
-
-    if(!response.ok){
-      throw new Error(`資料服務回應錯誤（HTTP ${response.status}）`);
-    }
-
+    const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:body.toString()});
+    if(!response.ok) throw new Error(`資料服務回應錯誤（HTTP ${response.status}）`);
     const result=await response.json();
-
-    if(!result.ok){
-      throw new Error(result.error||"資料寫入失敗。");
-    }
-
+    if(!result.ok) throw new Error(result.error||"資料寫入失敗。");
     closeInputModal();
-    showToast(editingRow===null?"新增成功":"修改成功");
+    showToast(isEditing?"修改成功":"新增成功");
     await load();
   }catch(err){
     console.error(err);
     showToast(err.message||"資料寫入失敗");
   }finally{
     btn.disabled=false;
-    btn.textContent=editingRow===null?"儲存":"儲存修改";
+    btn.textContent=isEditing?"儲存修改":"儲存";
   }
 }
 
@@ -903,6 +926,128 @@ $("cancelModal").addEventListener(
   "click",
   closeInputModal
 );
+
+
+let stockMode=null;
+let stockSelectedRow=null;
+
+function openStockManager(){
+  stockMode=null;
+  stockSelectedRow=null;
+  $('stockModalBackdrop').classList.add('show');
+  showStockMenu();
+}
+
+function closeStockManager(){
+  $('stockModalBackdrop').classList.remove('show');
+  stockMode=null;
+  stockSelectedRow=null;
+}
+
+function showStockMenu(){
+  $('stockMenuView').style.display='block';
+  $('stockFormView').style.display='none';
+  $('stockModalTitle').textContent='股票管理';
+}
+
+function getStockRows(){
+  return Array.isArray(window.currentDashboardData?.stockAssets)
+    ? window.currentDashboardData.stockAssets.filter(x=>Number(x.row)>=2 && Number(x.row)<=15)
+    : [];
+}
+
+function showStockForm(mode){
+  stockMode=mode;
+  stockSelectedRow=null;
+  $('stockMenuView').style.display='none';
+  $('stockFormView').style.display='block';
+  $('stockModalTitle').textContent=mode==='add'?'新增股票':mode==='edit'?'修改股票':'刪除股票';
+  $('stockTickerField').style.display=mode==='add'?'block':'none';
+  $('stockTickerSelectField').style.display=mode==='add'?'none':'block';
+  $('stockSaveBtn').textContent=mode==='delete'?'刪除':'儲存';
+  $('stockSaveBtn').className=mode==='delete'?'primary-btn':'primary-btn';
+  $('stockSharesInput').disabled=mode==='delete';
+
+  const rows=getStockRows();
+  if(mode!=='add'){
+    const select=$('stockTickerSelect');
+    select.innerHTML=rows.length
+      ? rows.map(x=>`<option value="${esc(String(x.row))}">${esc(x.ticker)}</option>`).join('')
+      : '<option value="">目前沒有可管理的股票</option>';
+    select.disabled=!rows.length;
+    stockSelectedRow=rows.length?Number(rows[0].row):null;
+    $('stockSharesInput').value=rows.length&&rows[0].shares!=null?rows[0].shares:'';
+  }else{
+    $('stockTickerInput').value='';
+    $('stockSharesInput').value='';
+  }
+
+  $('stockFormHint').textContent=mode==='add'
+    ? '新增只使用 G8:H15 的第一個可用空白列；G16 以下不會寫入。單價與現值由試算表公式處理。'
+    : mode==='edit'
+      ? '修改只更新所選股票的 H 欄持有股數；代號與 I/J 公式保留。'
+      : '刪除只清除所選股票的 G/H；I/J 公式保留，之後可重新使用該列。';
+}
+
+document.querySelectorAll('[data-stock-mode]').forEach(btn=>btn.addEventListener('click',()=>showStockForm(btn.dataset.stockMode)));
+
+$('stockTickerSelect').addEventListener('change',()=>{
+  const row=Number($('stockTickerSelect').value);
+  stockSelectedRow=Number.isInteger(row)?row:null;
+  const rec=getStockRows().find(x=>Number(x.row)===row);
+  $('stockSharesInput').value=rec&&rec.shares!=null?rec.shares:'';
+});
+
+async function saveStock(){
+  const mode=stockMode;
+  if(!mode)return;
+
+  const payload={action:mode==='add'?'addStock':mode==='edit'?'updateStock':'deleteStock'};
+  if(mode==='add'){
+    payload.ticker=$('stockTickerInput').value.trim().toUpperCase();
+    payload.shares=$('stockSharesInput').value;
+    if(!payload.ticker||payload.shares===''){showToast('請完整填寫股票代號與持有股數');return;}
+  }else{
+    payload.row=stockSelectedRow;
+    if(!payload.row){showToast('目前沒有可管理的股票');return;}
+    if(mode==='edit'&&$('stockSharesInput').value===''){showToast('請填寫持有股數');return;}
+    if(mode==='delete'){
+      const rec=getStockRows().find(x=>Number(x.row)===Number(payload.row));
+      if(!rec)return;
+      if(!confirm(`確定要刪除 ${rec.ticker} 嗎？`))return;
+    }else{
+      payload.shares=$('stockSharesInput').value;
+    }
+  }
+
+  const btn=$('stockSaveBtn');
+  btn.disabled=true;
+  btn.textContent='處理中…';
+  try{
+    const body=new URLSearchParams();
+    Object.entries(payload).forEach(([k,v])=>body.append(k,String(v??'')));
+    const response=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:body.toString()});
+    if(!response.ok)throw new Error(`資料服務回應錯誤（HTTP ${response.status}）`);
+    const result=await response.json();
+    if(!result.ok)throw new Error(result.error||'股票資料寫入失敗。');
+    closeStockManager();
+    showToast(mode==='add'?'新增股票成功':mode==='edit'?'修改股票成功':'刪除股票成功');
+    await load();
+  }catch(err){
+    console.error(err);
+    showToast(err.message||'股票資料寫入失敗');
+  }finally{
+    btn.disabled=false;
+    btn.textContent=mode==='delete'?'刪除':'儲存';
+  }
+}
+
+$('openStockManagerBtn').addEventListener('click',openStockManager);
+$('closeStockModal').addEventListener('click',closeStockManager);
+$('stockBackBtn').addEventListener('click',showStockMenu);
+$('stockSaveBtn').addEventListener('click',saveStock);
+$('stockModalBackdrop').addEventListener('click',e=>{if(e.target===$('stockModalBackdrop'))closeStockManager();});
+
 
 $("dailyTable").addEventListener(
   "click",
