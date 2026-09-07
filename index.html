@@ -255,7 +255,7 @@ button,input{font:inherit}.main{max-width:1500px;margin:auto;padding:18px 22px 8
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbxMkJCUcpCUyiljb8CwAJgE32wMlaqcfP69yqlbTiDLseu6KtJmgD8FRpnTj8HLiqxAPg/exec";
-const EXPECTED_API_VERSION="V2.12-STOCK-RANGE";
+const EXPECTED_API_VERSION="V2.16-DATA-INTEGRITY";
 
 const $=id=>document.getElementById(id);
 
@@ -855,12 +855,24 @@ function showToast(t){
 
 let editingRow=null;
 
+function getTaipeiToday(){
+  const parts=new Intl.DateTimeFormat("en-CA",{
+    timeZone:"Asia/Taipei",
+    year:"numeric",
+    month:"2-digit",
+    day:"2-digit"
+  }).formatToParts(new Date());
+  const map={};
+  parts.forEach(p=>{ if(p.type!=="literal") map[p.type]=p.value; });
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
 function openInputModal(record=null){
   editingRow=record?.row??null;
 
   $("inputDate").value=
     record?.date ||
-    new Date().toISOString().slice(0,10);
+    getTaipeiToday();
 
   $("inputStock").value=record?.stock??"";
   $("inputSavings").value=record?.savings??"";
